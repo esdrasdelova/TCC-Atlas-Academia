@@ -1,0 +1,93 @@
+@{
+    var nome = ViewData["UsuarioNome"] as string ?? "Personal";
+    var primeiroNome = nome.Split(' ')[0];
+}
+
+<div class="saudacao">
+    <h2>Olá, <em>@primeiroNome</em>!</h2>
+    <p>Gerencie seus alunos e treinos de um só lugar.</p>
+</div>
+
+<div class="painel-grid">
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Meus alunos</span>
+            <span class="card-icone"><partial name="_Icone" model='@("users")' /></span>
+        </div>
+        <strong class="card-valor"><em>@ViewBag.TotalAlunos</em> ativos</strong>
+        <p>Alunos sob sua responsabilidade neste momento.</p>
+        <div class="card-acoes">
+            <a asp-area="Personal" asp-controller="Personal" asp-action="Alunos" class="btn btn-primary btn-sm">Visualizar alunos</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Treinos</span>
+            <span class="card-icone"><partial name="_Icone" model='@("dumbbell")' /></span>
+        </div>
+        <strong class="card-valor">@ViewBag.TotalTreinos<em> cadastrados</em></strong>
+        <p>Treinos criados sob a sua responsabilidade.</p>
+        <div class="card-acoes">
+            <a asp-area="Personal" asp-controller="Personal" asp-action="Treinos" class="btn btn-primary btn-sm">Gerenciar treinos</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Pendências</span>
+            <span class="card-icone"><partial name="_Icone" model='@("bolt")' /></span>
+        </div>
+        <strong class="card-valor">@ViewBag.AlunosSemTreino<em> sem treino</em></strong>
+        <p>Alunos ativos aguardando atribuição de treino.</p>
+        <div class="card-acoes">
+            <a asp-area="Personal" asp-controller="Personal" asp-action="CriarTreino" class="btn btn-ghost btn-sm">Criar treino agora</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Banco de exercícios</span>
+            <span class="card-icone"><partial name="_Icone" model='@("pulse")' /></span>
+        </div>
+        <strong class="card-valor">Consulte<em> o catálogo</em></strong>
+        <p>Todos os exercícios disponíveis, por grupo muscular.</p>
+        <div class="card-acoes">
+            <a asp-area="Personal" asp-controller="Personal" asp-action="BancoExercicios" class="btn btn-ghost btn-sm">Abrir catálogo</a>
+        </div>
+    </div>
+</div>
+
+<div class="painel-secao">
+    <h2>Atalhos rápidos</h2>
+</div>
+
+<div class="lista-painel">
+    <a asp-area="Personal" asp-controller="Personal" asp-action="CriarTreino" class="lista-item" style="color:inherit;">
+        <div class="lista-info">
+            <strong>Criar novo treino</strong>
+            <small>Monte a ficha completa com séries, repetições e descanso.</small>
+        </div>
+        <div class="lista-acoes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+    </a>
+    <a asp-area="Personal" asp-controller="Personal" asp-action="Alunos" class="lista-item" style="color:inherit;">
+        <div class="lista-info">
+            <strong>Acompanhar evolução dos alunos</strong>
+            <small>Consulte o treino atual e o status de cada aluno.</small>
+        </div>
+        <div class="lista-acoes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+    </a>
+    <a asp-area="Personal" asp-controller="Personal" asp-action="BancoExercicios" class="lista-item" style="color:inherit;">
+        <div class="lista-info">
+            <strong>Banco de exercícios</strong>
+            <small>Pesquise exercícios por grupo muscular antes de montar a ficha.</small>
+        </div>
+        <div class="lista-acoes">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </div>
+    </a>
+</div>

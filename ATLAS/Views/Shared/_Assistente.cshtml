@@ -1,0 +1,46 @@
+<!-- Assistente Atlas — respostas locais, sem serviços externos -->
+<button type="button" id="assistente-botao" class="assistente-botao" aria-haspopup="dialog" aria-expanded="false" aria-controls="assistente-painel" title="Assistente IA">
+    <span class="assistente-icone" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3.4 13.7 8.6 18.9 10.3 13.7 12 12 17.2 10.3 12 5.1 10.3 10.3 8.6 12 3.4Z" />
+            <path d="M18.3 16.3 18.9 17.7 20.3 18.3 18.9 18.9 18.3 20.3 17.7 18.9 16.3 18.3 17.7 17.7 18.3 16.3Z" />
+        </svg>
+    </span>
+    <span class="assistente-rotulo">Assistente IA</span>
+</button>
+
+<div id="assistente-painel" class="assistente-painel" role="dialog" aria-modal="false" aria-label="Assistente Atlas" hidden>
+    <header class="assistente-topo">
+        <span class="assistente-logo">
+            <img src="~/images/logo-atlas.png" alt="Atlas" asp-append-version="true" />
+        </span>
+        <div>
+            <strong>Assistente Atlas</strong>
+            <small>Dúvidas comuns de treino e saúde</small>
+        </div>
+        <button type="button" id="assistente-fechar" class="assistente-fechar" aria-label="Fechar assistente">&times;</button>
+    </header>
+
+    <div class="assistente-corpo">
+        <section id="assistente-topicos" class="assistente-topicos">
+            <p class="assistente-intro">Olá! Escolha um assunto abaixo e veja a orientação da nossa equipe.</p>
+            <!-- Tópicos inseridos via JS -->
+        </section>
+
+        <section id="assistente-resposta" class="assistente-resposta" hidden>
+            <button type="button" id="assistente-voltar" class="assistente-voltar">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                Voltar aos assuntos
+            </button>
+            <h3 id="assistente-pergunta"></h3>
+            <div id="assistente-texto" class="assistente-texto"></div>
+        </section>
+    </div>
+
+    <footer class="assistente-rodape">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        Conteúdo educativo — não substitui orientação médica ou profissional.
+    </footer>
+</div>
+
+<script src="~/js/assistente.js" asp-append-version="true"></script>

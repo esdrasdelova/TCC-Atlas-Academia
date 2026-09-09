@@ -1,0 +1,99 @@
+@model Treino
+
+<div class="saudacao">
+    <h2>Ficha de treino · <em>@Model.Nome</em></h2>
+    <p>Aluno @Model.Aluno?.NomeCompleto · responsável: @(Model.Personal?.NomeCompleto ?? "—")</p>
+</div>
+
+<div style="display:flex; gap:1rem; align-items:center; flex-wrap:wrap; margin-bottom:1.6rem;">
+    <span class="chip @(Model.Publicado ? "chip-verde" : "chip-cinza")">
+        @(Model.Publicado ? "Publicado" : "Oculto do aluno")
+    </span>
+    <span class="chip @(Model.Ativo ? "chip-verde" : "chip-cinza")">
+        @(Model.Ativo ? "Em uso pelo aluno" : "Alternativo")
+    </span>
+    <div style="margin-left:auto; display:flex; gap:0.7rem; flex-wrap:wrap;">
+        <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoEditar" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Editar ficha</a>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoAlternarPublicacao" asp-route-id="@Model.Id"
+              onsubmit="return confirm('@(!Model.Publicado || !Model.Ativo ? "Ativar" : "Ocultar") o treino &quot;@Model.Nome&quot;?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm">
+                @(!Model.Publicado || !Model.Ativo ? "Usar agora" : "Ocultar do aluno")
+            </button>
+        </form>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoExcluir" asp-route-id="@Model.Id"
+              onsubmit="return confirm('Excluir o treino &quot;@Model.Nome&quot;? Esta ação não pode ser desfeita.');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+        </form>
+    </div>
+</div>
+
+<div class="painel-grid painel-grid-3">
+    <div class="card">
+        <span class="card-label">Foco do treino</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@(Model.Objetivo ?? "Não definido")</strong>
+        <p>Criado em @Model.DataCriacao.ToLocalTime().ToString("dd/MM/yyyy")</p>
+    </div>
+    <div class="card">
+        <span class="card-label">Aluno</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@Model.Aluno?.NomeCompleto</strong>
+        <p><a href="@Url.Action("AlunoDetalhe", new { id = Model.AlunoId })" style="color:var(--green);">Ver ficha completa</a></p>
+    </div>
+    <div class="card">
+        <span class="card-label">Responsável</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@(Model.Personal?.NomeCompleto ?? "—")</strong>
+        @if (!string.IsNullOrEmpty(Model.Personal?.RegistroProfissional))
+        {
+            <p>@Model.Personal.RegistroProfissional</p>
+        }
+    </div>
+</div>
+
+<div class="painel-secao" style="margin-top:2rem; margin-bottom:0.9rem;">
+    <h2>Exercícios (@Model.Itens.Count)</h2>
+    <span>Prescrição em ordem de execução</span>
+</div>
+
+@if (Model.Itens.Count == 0)
+{
+    <div class="lista-painel">
+        <div class="lista-item">
+            <div class="lista-info">
+                <strong>Treino sem exercícios</strong>
+                <small>Edite a ficha para adicionar exercícios.</small>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="treino-lista card" style="padding:0.4rem 1.4rem;">
+        @foreach (var item in Model.Itens.OrderBy(i => i.Ordem))
+        {
+            var exercicio = item.Exercicio;
+            <div class="exercicio-item">
+                <span class="exercicio-num">@item.Ordem</span>
+                <div class="exercicio-info">
+                    <h4>@(exercicio?.Nome ?? $"#{item.ExercicioId}")</h4>
+                    <small>
+                        @if (exercicio != null)
+                        {
+                            @exercicio.GrupoMuscular
+                        }
+                        else
+                        {
+                            <span>exercício removido do catálogo</span>
+                        }
+                        · @item.Series séries · @item.Repeticoes reps · descanso @item.DescansoSegundos s
+                    </small>
+                    <p class="exercicio-prescricao">@item.Observacoes</p>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<a asp-area="Admin" asp-controller="Admin" asp-action="Treinos" class="btn btn-ghost btn-sm" style="margin-top:1.8rem;">
+    &larr; Voltar para treinos
+</a>

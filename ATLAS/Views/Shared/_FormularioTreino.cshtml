@@ -1,0 +1,134 @@
+@model TreinoFormViewModel
+@{
+    var alunos = ViewBag.AlunosSelect as List<OpcaoSelect> ?? new List<OpcaoSelect>();
+    var personais = ViewBag.PersonaisSelect as List<OpcaoSelect>;
+    var area = ViewBag.FormArea as string ?? "Personal";
+    var controller = ViewBag.FormController as string ?? "Personal";
+    var cancelarUrl = ViewBag.CancelarUrl as string;
+    var editando = Model.Id > 0;
+}
+
+<form asp-area="@area" asp-controller="@controller" method="post" class="painel-form">
+    @if (editando)
+    {
+        <input type="hidden" name="Id" value="@Model.Id" />
+    }
+
+    <div class="form-row">
+        <div class="form-field">
+            <label for="aluno">Aluno</label>
+            <select id="aluno" name="AlunoId" required>
+                <option value="" disabled selected>Selecione o aluno</option>
+                @foreach (var a in alunos)
+                {
+                    <option value="@a.Id" selected="@(Model.AlunoId == a.Id)">@a.Texto</option>
+                }
+            </select>
+        </div>
+        <div class="form-field">
+            <label for="nomeTreino">Nome do treino</label>
+            <input type="text" id="nomeTreino" name="Nome" value="@Model.Nome" placeholder='Ex.: "Treino A — Peito e Tríceps"' required />
+        </div>
+    </div>
+
+    @if (personais != null)
+    {
+        <div class="form-row">
+            <div class="form-field">
+                <label for="personalResponsavel">Personal responsável</label>
+                <select id="personalResponsavel" name="PersonalId">
+                    <option value="" disabled selected>Selecione o responsável pela ficha</option>
+                    @foreach (var p in personais)
+                    {
+                        <option value="@p.Id" selected="@(Model.PersonalId == p.Id)">@p.Texto</option>
+                    }
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="objetivoAdm">Foco / objetivo</label>
+                <select id="objetivoAdm" name="Objetivo">
+                    @foreach (var opcao in new[] { "Hipertrofia", "Força", "Emagrecimento", "Condicionamento físico", "Reabilitação / mobilidade" })
+                    {
+                        <option selected="@(Model.Objetivo == opcao)">@opcao</option>
+                    }
+                </select>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-row">
+            <div class="form-field">
+                <label for="objetivo">Foco / objetivo</label>
+                <select id="objetivo" name="Objetivo">
+                    @foreach (var opcao in new[] { "Hipertrofia", "Força", "Emagrecimento", "Condicionamento físico", "Reabilitação / mobilidade" })
+                    {
+                        <option selected="@(Model.Objetivo == opcao)">@opcao</option>
+                    }
+                </select>
+            </div>
+            <div class="form-field">
+                <label>Situação</label>
+                <label class="check-linha">
+                    <input type="checkbox" name="Publicado" value="true" checked="@Model.Publicado" />
+                    <span>Publicar para o aluno imediatamente</span>
+                </label>
+            </div>
+        </div>
+    }
+
+    @if (personais != null)
+    {
+        <div class="form-field">
+            <label>Situação</label>
+            <label class="check-linha">
+                <input type="checkbox" name="Publicado" value="true" checked="@Model.Publicado" />
+                <span>Publicar para o aluno imediatamente</span>
+            </label>
+        </div>
+    }
+
+    <div class="form-field">
+        <label>Exercícios</label>
+        <div id="lista-exercicios"></div>
+        <button type="button" id="btn-add-exercicio" class="btn btn-ghost btn-sm">
+            + Adicionar exercício
+        </button>
+    </div>
+
+    <div class="form-field">
+        <label for="observacoes">Observações gerais para o aluno</label>
+        <textarea id="observacoes" name="Observacoes" rows="3" placeholder="Ex.: aquecer 5 min na esteira antes de iniciar; cadência controlada na fase excêntrica.">@Model.Observacoes</textarea>
+    </div>
+
+    <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+
+    <div style="display:flex; gap:0.9rem; align-items:center; margin-top:0.4rem;">
+        <button type="submit" class="btn btn-primary btn-lg">
+            @(editando ? "Salvar alterações" : "Publicar treino")
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+        </button>
+        @if (!string.IsNullOrEmpty(cancelarUrl))
+        {
+            <a href="@cancelarUrl" class="btn btn-ghost btn-sm">Cancelar</a>
+        }
+        <small style="color:var(--muted); font-size:0.82rem;">O aluno recebe o treino assim que ele for publicado.</small>
+    </div>
+</form>
+
+<script type="application/json" id="treino-form-dados">
+{
+    "catalogo": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        ((List<ExercicioOpcao>)ViewBag.CatalogoExercicios)
+            .Select(e => new { id = e.Id, nome = e.Nome, grupo = e.GrupoMuscular }))),
+    "exercicios": @Html.Raw(System.Text.Json.JsonSerializer.Serialize(
+        Model.Exercicios.Select(e => new {
+            exercicioId = e.ExercicioId,
+            series = e.Series,
+            repeticoes = e.Repeticoes,
+            carga = e.Carga,
+            descanso = e.DescansoSegundos,
+            obs = e.Observacoes
+        })))
+}
+</script>

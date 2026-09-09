@@ -1,0 +1,108 @@
+﻿@model HomeViewModel
+@{
+    ViewData["Title"] = "Atlas Centro de Treinamento";
+}
+
+<section class="hero" id="inicio">
+    <div class="hero-bg" aria-hidden="true">
+        <div class="hero-glow"></div>
+        <div class="hero-grid"></div>
+    </div>
+
+    <div class="container hero-inner">
+        <div class="hero-col">
+            <p class="hero-eyebrow reveal">Centro de treinamento <span></span> performance</p>
+            <h1 class="hero-title reveal">
+                Supere os seus <span class="txt-gradiente">limites</span>.<br />
+                Treine na <span class="txt-verde">ATLAS</span>.
+            </h1>
+            <p class="hero-sub reveal">
+                A Atlas é um centro de treinamento voltado para evolução, saúde e desempenho.
+                Estrutura moderna, treinadores especializados e ciência aplicada a cada treino —
+                para você ir mais longe do que imaginava.
+            </p>
+            <div class="hero-actions reveal">
+                <a asp-controller="Sobre" asp-action="Index" class="btn btn-primary btn-lg">Conheça a Atlas</a>
+                <a asp-controller="Agendamento" asp-action="Index" class="btn btn-ghost btn-lg">Começar agora
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </a>
+            </div>
+
+            <div class="hero-strip reveal" aria-hidden="true">
+                <span>MUSCULAÇÃO</span><i></i>
+                <span>FUNCIONAL</span><i></i>
+                <span>PILATES</span><i></i>
+                <span>FISIOTERAPIA</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<section class="section destaques" id="destaques">
+    <div class="container">
+        <div class="section-head reveal">
+            <p class="kicker">A Atlas em números</p>
+            <h2 class="section-title">Uma estrutura feita para <span class="txt-gradiente">resultados</span></h2>
+        </div>
+        <div class="destaques-grid reveal">
+            @foreach (var item in Model.Destaques)
+            {
+                <article class="destaque-card">
+                    <div class="destaque-icone">
+                        <partial name="_Icone" model="item.Icone" />
+                    </div>
+                    <strong class="destaque-valor">@item.Valor</strong>
+                    <h3>@item.Titulo</h3>
+                    <p>@item.Descricao</p>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="modalidades" id="modalidades">
+    <div class="container section">
+        <div class="section-head reveal">
+            <p class="kicker">Modalidades</p>
+            <h2 class="section-title">Encontre o treino que <span class="txt-gradiente">combina com você</span></h2>
+            <p class="lead">Todas as modalidades incluem avaliação física inicial, acompanhamento profissional e acesso gratuito ao app de treinos.</p>
+        </div>
+        <div class="modalidades-grid">
+            @foreach (var item in Model.Modalidades)
+            {
+                <article class="mod-card reveal">
+                    <div class="mod-icone">
+                        <partial name="_Icone" model="item.Icone" />
+                    </div>
+                    <h3>@item.Titulo</h3>
+                    <p>@item.Descricao</p>
+                    <a asp-controller="Modalidades" asp-action="Index" class="mod-link">
+                        Conhecer modalidade
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                    </a>
+                </article>
+            }
+        </div>
+    </div>
+</section>
+
+<section class="section cta" id="cta">
+    <div class="container cta-inner reveal">
+        <h2 class="cta-title">
+            Está pronto para <span class="txt-gradiente">evoluir</span>?
+        </h2>
+        <p class="lead">
+            Conheça nossos planos ou agende uma aula experimental gratuita.
+        </p>
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a asp-controller="Planos" asp-action="Index" class="btn btn-primary btn-lg">Ver planos</a>
+            <a asp-controller="Agendamento" asp-action="Index" class="btn btn-ghost btn-lg">Agende sua aula</a>
+        </div>
+        <span class="cta-selo" aria-hidden="true">
+            <strong>1ª</strong>
+            <small>aula grátis</small>
+        </span>
+    </div>
+</section>

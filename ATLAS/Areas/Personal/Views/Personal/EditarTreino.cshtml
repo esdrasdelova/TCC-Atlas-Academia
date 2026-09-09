@@ -1,0 +1,16 @@
+@model TreinoFormViewModel
+
+<div class="saudacao">
+    <h2>Editar <em>treino</em></h2>
+    <p>Ajuste exercícios, séries e observações da ficha — as alterações aparecem na área do aluno imediatamente.</p>
+</div>
+
+<partial name="_FormularioTreino" model="Model" />
+
+<a asp-area="Personal" asp-controller="Personal" asp-action="Detalhe" asp-route-id="@Model.Id" class="btn btn-ghost btn-sm" style="margin-top:0.9rem;">
+    Voltar para o treino
+</a>
+
+@section Scripts {
+    <script src="~/js/treino-form.js" asp-append-version="true"></script>
+}

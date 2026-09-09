@@ -1,0 +1,24 @@
+@model EmBreveViewModel
+
+<div class="demo-banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    <span>Módulo em preparação — será ativado junto com o banco de dados.</span>
+</div>
+
+<div class="card" style="max-width:620px;">
+    <div class="card-topo">
+        <span class="card-label">Próxima etapa</span>
+        <span class="card-icone">
+            <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+        </span>
+    </div>
+    <strong class="card-valor">@Model.Recurso</strong>
+    <p>@Model.Descricao</p>
+    <p>Este módulo ainda não foi habilitado nesta versão do painel.
+        As estruturas de dados e as permissões já estão definidas no projeto
+        (<code>Migrations</code>, <code>Models/Entities</code> e <code>Models/Permissoes.cs</code>)
+        e ele poderá ser ativado em uma próxima etapa.</p>
+    <div class="card-acoes">
+        <a asp-area="Admin" asp-controller="Admin" asp-action="Index" class="btn btn-ghost btn-sm">&larr; Voltar à visão geral</a>
+    </div>
+</div>

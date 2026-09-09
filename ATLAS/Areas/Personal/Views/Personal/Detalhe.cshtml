@@ -1,0 +1,63 @@
+@model Treino
+@{
+    var aluno = Model.Aluno;
+}
+
+<div class="saudacao">
+    <h2>@Model.Nome — <em>@(Model.Objetivo ?? "treino personalizado")</em></h2>
+    <p>Ficha de <em>@aluno.NomeCompleto.Split(' ')[0]</em> · criada em @Model.DataCriacao.ToLocalTime().ToString("dd/MM/yyyy")</p>
+</div>
+
+<div class="painel-acoes">
+    <div class="painel-acoes-chips">
+        @if (!Model.Publicado)
+        {
+            <span class="chip chip-cinza">Oculto do aluno</span>
+        }
+        else if (Model.Ativo)
+        {
+            <span class="chip chip-verde">Em uso pelo aluno</span>
+        }
+        else
+        {
+            <span class="chip chip-cinza">Treino alternativo</span>
+        }
+        <span class="chip chip-cinza">@Model.Itens.Count exercícios</span>
+    </div>
+    <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+        <a asp-area="Personal" asp-controller="Personal" asp-action="Editar" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">
+            Editar treino
+        </a>
+        <form method="post" asp-area="Personal" asp-controller="Personal" asp-action="AlternarPublicacao" asp-route-id="@Model.Id"
+              onsubmit="return confirm('@(Model.Publicado ? "Ocultar" : "Publicar") o treino &quot;@Model.Nome&quot;?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm">
+                @(Model.Publicado ? "Ocultar do aluno" : "Publicar")
+            </button>
+        </form>
+        <form method="post" asp-area="Personal" asp-controller="Personal" asp-action="Excluir" asp-route-id="@Model.Id"
+              onsubmit="return confirm('Excluir o treino &quot;@Model.Nome&quot;? Esta ação não pode ser desfeita.');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+        </form>
+    </div>
+</div>
+
+<div class="painel-secao" style="margin-top:1.8rem; margin-bottom:0.9rem;">
+    <h2>Ficha do treino</h2>
+    <span>Somente leitura · edição via "Editar treino"</span>
+</div>
+
+<partial name="_TabelaTreino" model="Model.Itens.OrderBy(i => i.Ordem).ToList()" />
+
+@if (!string.IsNullOrEmpty(Model.Observacoes))
+{
+    <div class="aviso" style="margin-top:1.2rem;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span><strong>Observações:</strong> @Model.Observacoes</span>
+    </div>
+}
+
+<a asp-area="Personal" asp-controller="Personal" asp-action="Treinos" class="btn btn-ghost btn-sm" style="margin-top:1.2rem;">
+    Voltar para treinos
+</a>

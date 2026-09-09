@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Sobre nós";
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Sobre nós</p>
+        <h1 class="reveal">Mais que uma academia.<br />Uma <span class="txt-verde">evolução</span>.</h1>
+        <p class="reveal">
+            A Atlas nasceu com um propósito claro: transformar a relação das pessoas
+            com o próprio corpo, unindo treinamento de alto nível, saúde e tecnologia.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+
+    <section class="grid-2 historia">
+        <div class="reveal">
+            <h2 class="bloco-titulo">Nossa <span class="txt-verde">história</span></h2>
+            <p>
+                A Atlas começou pequena — uma sala de musculação, alguns halteres e uma
+                convicção: ninguém deveria treinar sem orientação de verdade. Com o tempo,
+                aquele espaço se transformou em um centro de treinamento completo.
+            </p>
+            <p>
+                Hoje, reunimos treinadores especializados, equipamentos modernos e uma
+                metodologia própria que coloca o aluno no centro de tudo. Cada treino é
+                pensado individualmente, cada evolução é medida e celebrada.
+            </p>
+            <p>
+                E não paramos aí: a Atlas está construindo sua própria plataforma digital,
+                para que o acompanhamento não termine quando você sai da sala de treino.
+            </p>
+
+            <ul class="timeline">
+                <li><strong>2016</strong> Fundação da primeira unidade da Atlas.</li>
+                <li><strong>2019</strong> Expansão da estrutura e novos espaços de treino funcional.</li>
+                <li><strong>2023</strong> Centro de treinamento completo, com pilates e fisioterapia.</li>
+                <li><strong>Hoje</strong> Plataforma digital para acompanhamento dos alunos.</li>
+            </ul>
+        </div>
+
+        <div class="sobre-visual reveal" aria-hidden="true">
+            <div class="sobre-card">
+                <span class="sobre-card-num">01</span>
+                <h4>Treino com propósito</h4>
+                <p>Cada exercício existe por um motivo — e você sabe qual é.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">02</span>
+                <h4>Acompanhamento real</h4>
+                <p>Profissionais que conhecem seu nome, seu objetivo e seu progresso.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">03</span>
+                <h4>Evolução medida</h4>
+                <p>Avaliações periódicas para provar que você está indo mais longe.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">04</span>
+                <h4>Tecnologia a favor</h4>
+                <p>Treinos disponíveis onde você estiver, direto na sua conta Atlas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-top:6rem;">
+        <p class="kicker reveal">O que nos move</p>
+        <h2 class="bloco-titulo reveal">Missão, visão e <span class="txt-verde">valores</span></h2>
+        <div class="grid-3" style="margin-top:2.2rem;">
+            <article class="valor-card reveal">
+                <h3><em>Missão</em></h3>
+                <p>Promover saúde e desempenho através de treinamento acessível, científico e humano — ajudando cada aluno a superar os próprios limites.</p>
+            </article>
+            <article class="valor-card reveal">
+                <h3><em>Visão</em></h3>
+                <p>Ser referência em centros de treinamento, integrando academia e tecnologia em uma única experiência de evolução contínua.</p>
+            </article>
+            <article class="valor-card reveal">
+                <h3><em>Valores</em></h3>
+                <p>Compromisso com resultado · Respeito ao ritmo de cada aluno · Ciência antes de modinha · Comunidade que apoia · Evolução constante.</p>
+            </article>
+        </div>
+    </section>
+
+    <section style="margin-top:6rem;" id="cta">
+        <div class="cta-inner reveal" style="text-align:center;">
+            <h2 class="cta-title">Quer treinar <span class="txt-verde">conosco</span>?</h2>
+            <p class="lead" style="margin:0 auto 2rem;">Agende uma aula experimental e conheça a Atlas por dentro.</p>
+            <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-xl">Agende sua aula</a>
+        </div>
+    </section>
+</div>

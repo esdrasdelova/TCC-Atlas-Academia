@@ -1,0 +1,53 @@
+@model List<Aluno>
+
+<div class="saudacao">
+    <h2>Meus <em>alunos</em></h2>
+    <p>Selecione um aluno para visualizar a ficha completa e gerenciar treinos.</p>
+</div>
+
+<div class="painel-secao" style="margin-top:0;">
+    <h2>Todos os alunos (@Model.Count)</h2>
+    <span>Clique em um aluno para abrir a ficha</span>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.7 5.5-4.7s4.9 1.7 5.5 4.7"/><path d="M15.5 5.4a3.2 3.2 0 0 1 0 5.2"/><path d="M17.3 14.6c1.8.6 3 2 3.4 4.4"/></svg>
+        </span>
+        <strong>Nenhum aluno vinculado a você ainda</strong>
+        <small>A administração pode vincular alunos à sua conta pela ficha do aluno.</small>
+    </div>
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var aluno in Model)
+        {
+            var iniciais = string.Concat(aluno.NomeCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+            var treinoAtivo = aluno.Treinos.FirstOrDefault(t => t.Ativo && t.Publicado);
+            <a asp-area="Personal" asp-controller="Personal" asp-action="Detalhes" asp-route-id="@aluno.Id" class="lista-item" style="color:inherit;">
+                <span class="avatar" aria-hidden="true">@iniciais</span>
+                <div class="lista-info">
+                    <strong>@aluno.NomeCompleto</strong>
+                    <small>
+                        @aluno.Email · Objetivo: @(aluno.Objetivo ?? "não definido")
+                        @if (treinoAtivo != null)
+                        {
+                            <span>· Treino atual: @treinoAtivo.Nome</span>
+                        }
+                        else
+                        {
+                            <span>· Sem treino ativo</span>
+                        }
+                    </small>
+                </div>
+                <div class="lista-acoes">
+                    <span class="chip @(aluno.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "chip-verde" : "chip-cinza")">@(aluno.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Ativa" : "Inativa")</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+                </div>
+            </a>
+        }
+    </div>
+}

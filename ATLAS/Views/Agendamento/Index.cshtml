@@ -1,0 +1,112 @@
+@model SiteConfig
+@{
+    ViewData["Title"] = "Agende sua aula";
+    var aviso = TempData["Aviso"] as string;
+    var erro = TempData["Erro"] as string;
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Agendamento</p>
+        <h1 class="reveal">Sua primeira aula é por nossa <span class="txt-verde">conta</span>.</h1>
+        <p class="reveal">
+            Escolha a modalidade, o dia e o horário. Nossa equipe confirma seu agendamento
+            e prepara tudo para a sua chegada.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+    <div class="contato-grid">
+
+        <div class="painel-form reveal">
+            <h2 class="bloco-titulo" style="font-size:1.4rem;">Agende sua aula <span class="txt-verde">experimental</span></h2>
+
+            @if (!string.IsNullOrEmpty(aviso))
+            {
+                <div class="aviso">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+                    <span>@aviso</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(erro))
+            {
+                <div class="aviso aviso-erro">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+                    <span>@erro</span>
+                </div>
+            }
+
+            <form asp-controller="Agendamento" asp-action="Agendar" method="post">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="nome">Nome completo</label>
+                        <input type="text" id="nome" name="nome" placeholder="Ex.: João Silva" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="telefone">WhatsApp</label>
+                        <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-0000" required />
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="modalidade">Modalidade</label>
+                    <select id="modalidade" name="modalidade" required>
+                        @foreach (var m in Model.Modalidades)
+                        {
+                            <option>@m.Titulo</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="data">Data preferida</label>
+                        <input type="date" id="data" name="data" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="horario">Horário</label>
+                        <select id="horario" name="horario" required>
+                            <option value="" selected disabled>Escolha um horário</option>
+                            <option>Manhã — 07:00 às 10:00</option>
+                            <option>Tarde — 13:00 às 17:00</option>
+                            <option>Noite — 18:00 às 21:00</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="observacoes">Observações (opcional)</label>
+                    <textarea id="observacoes" name="observacoes" rows="3" placeholder="Alguma restrição física, objetivo específico ou dúvida?"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Confirmar agendamento</button>
+                <p class="form-nota" style="margin-top:0.9rem;">A confirmação será enviada pelo WhatsApp informado.</p>
+            </form>
+        </div>
+
+        <aside class="reveal">
+            <h3 style="font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.1em; font-size:1rem; margin-bottom:1.2rem;">Como funciona</h3>
+            <ul class="passos">
+                <li><span><strong>Escolha a modalidade</strong> — musculação, funcional, pilates ou fisioterapia.</span></li>
+                <li><span><strong>Selecione data e horário</strong> — conforme sua rotina.</span></li>
+                <li><span><strong>Receba a confirmação</strong> — pelo WhatsApp informado.</span></li>
+                <li><span><strong>Venha treinar</strong> — traga roupa, toalha e vontade de evoluir.</span></li>
+            </ul>
+
+            <ul class="contato-info" style="margin-top:1.8rem;">
+                <li>
+                    <strong>Onde ficamos</strong>
+                    <span>@Model.Endereco</span>
+                </li>
+                <li>
+                    <strong>Precisa de ajuda?</strong>
+                    <span>@Model.Telefone</span>
+                    <small>@Model.Email</small>
+                </li>
+            </ul>
+        </aside>
+    </div>
+</div>

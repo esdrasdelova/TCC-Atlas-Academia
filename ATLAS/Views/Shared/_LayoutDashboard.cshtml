@@ -1,0 +1,95 @@
+﻿@{
+    var titulo = ViewData["Titulo"] as string ?? "Painel";
+    var usuarioNome = ViewData["UsuarioNome"] as string ?? "Usuário";
+    var usuarioPapel = ViewData["UsuarioPapel"] as string ?? string.Empty;
+    var iniciais = string.Concat(usuarioNome.Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                        .Where(p => p.Length > 1).Take(2).Select(p => char.ToUpper(p[0])));
+    if (string.IsNullOrEmpty(iniciais)) { iniciais = "AT"; }
+    var sidebarPartial = ViewData["Sidebar"] as string;
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta name="color-scheme" content="dark" />
+    <title>@ViewData["Title"] - Atlas Centro de Treinamento</title>
+    <link rel="icon" href="~/images/logo-atlas.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/images/logo-atlas.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/dashboard.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/assistente.css" asp-append-version="true" />
+</head>
+<body class="dash-body">
+
+    <span class="scroll-progress" id="scrollProgress" aria-hidden="true"></span>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-head">
+            <a asp-controller="Home" asp-action="Index" class="brand" aria-label="Atlas - Página inicial">
+                <img src="~/images/logo-atlas.png" alt="Atlas" class="brand-logo" asp-append-version="true" />
+            </a>
+            <button type="button" class="sidebar-close" id="sidebarClose" aria-label="Fechar menu">&times;</button>
+        </div>
+
+        @if (!string.IsNullOrEmpty(sidebarPartial))
+        {
+            <nav class="sidebar-nav" aria-label="Menu da área">
+                <partial name="@sidebarPartial" />
+            </nav>
+        }
+
+        <div class="sidebar-foot">
+            <div class="sidebar-user">
+                <span class="avatar" aria-hidden="true">@iniciais</span>
+                <span class="user-info">
+                    <strong>@usuarioNome</strong>
+                    @if (!string.IsNullOrEmpty(usuarioPapel))
+                    {
+                        <small>@usuarioPapel</small>
+                    }
+                </span>
+            </div>
+            <form method="post" asp-area="" asp-controller="Account" asp-action="Logout" class="sair-form"
+                  onsubmit="return confirm('Encerrar sua sessão?');">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="sidebar-sair" title="Encerrar sessão">Sair
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3M15 8l4 4-4 4M19 12H10"/></svg>
+                </button>
+            </form>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="dash-main">
+        <header class="dash-topbar">
+            <button type="button" class="hamburger dash-toggle" id="sidebarToggle" aria-label="Abrir menu" aria-controls="sidebar">
+                <span></span><span></span><span></span>
+            </button>
+            <h1 class="dash-titulo">@titulo</h1>
+            <div class="dash-user" aria-hidden="true">
+                <span class="avatar avatar-sm">@iniciais</span>
+            </div>
+        </header>
+
+        <main class="dash-content" id="conteudo">
+            @RenderBody()
+        </main>
+    </div>
+
+    <partial name="_Assistente" />
+
+    <button type="button" class="voltar-topo" id="voltarTopo" aria-label="Voltar ao topo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

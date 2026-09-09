@@ -1,0 +1,47 @@
+@model string
+@{
+    var name = Model ?? string.Empty;
+}
+<svg class="icone" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    @if (name == "users")
+    {
+        <circle cx="9" cy="8" r="3.2"/>
+        <path d="M3.5 19c.6-3 2.8-4.7 5.5-4.7s4.9 1.7 5.5 4.7"/>
+        <path d="M15.5 5.4a3.2 3.2 0 0 1 0 5.2"/>
+        <path d="M17.3 14.6c1.8.6 3 2 3.4 4.4"/>
+    }
+    else if (name == "badge")
+    {
+        <circle cx="12" cy="10" r="6"/>
+        <path d="M9.8 10l1.6 1.6 2.8-3"/>
+        <path d="M8.2 15.2L7 21l5-2.4L17 21l-1.2-5.8"/>
+    }
+    else if (name == "dumbbell")
+    {
+        <path d="M7 12h10"/>
+        <rect x="3" y="8.5" width="3" height="7" rx="1"/>
+        <rect x="18" y="8.5" width="3" height="7" rx="1"/>
+        <path d="M6.2 6.5v11M17.8 6.5v11" opacity=".55"/>
+    }
+    else if (name == "space")
+    {
+        <rect x="3.5" y="3.5" width="17" height="17" rx="2"/>
+        <path d="M3.5 12h17M12 3.5v17"/>
+        <path d="M7.5 7.5h1.5M15 15h1.5" opacity=".55"/>
+    }
+    else if (name == "bolt")
+    {
+        <path d="M13 2.5L4.5 13.5H11l-1 8L18.5 10H12z"/>
+    }
+    else if (name == "lotus")
+    {
+        <circle cx="12" cy="5.5" r="1.6"/>
+        <path d="M12 8.5v4"/>
+        <path d="M12 12.5c-2.6 0-4.5 1.8-5.2 4.4C9 16.6 10.6 15 12 12.5zm0 0c2.6 0 4.5 1.8 5.2 4.4C15 16.6 13.4 15 12 12.5z"/>
+        <path d="M4.5 13.5c-.6 1.8-.3 3.6.9 5 1.6-1 2.3-2.3 2.3-4m12.8-1c.6 1.8.3 3.6-.9 5-1.6-1-2.3-2.3-2.3-4"/>
+    }
+    else if (name == "pulse")
+    {
+        <path d="M3 12h4l2-5 4 10 2.5-5H21"/>
+    }
+</svg>

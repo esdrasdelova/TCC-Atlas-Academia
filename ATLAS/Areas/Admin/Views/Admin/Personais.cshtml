@@ -1,0 +1,94 @@
+@model List<PersonalListItemViewModel>
+@{
+    var sucesso = TempData["Sucesso"] as string;
+    var erro = TempData["Erro"] as string;
+}
+
+<div class="saudacao">
+    <h2>Profissionais <em>(personais)</em></h2>
+    <p>Cadastre, edite e gerencie a equipe de professores da academia.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(sucesso))
+{
+    <div class="aviso">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(erro))
+{
+    <div class="aviso aviso-erro">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span>@erro</span>
+    </div>
+}
+
+<div class="painel-acoes">
+    <form method="get" class="busca-form" role="search">
+        <input type="search" name="q" value="@ViewBag.Busca" placeholder="Buscar por nome ou e-mail…" aria-label="Buscar profissional" />
+        <button type="submit" class="btn btn-ghost btn-sm">Buscar</button>
+        @if (!string.IsNullOrEmpty(ViewBag.Busca as string))
+        {
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Personais" class="btn btn-ghost btn-sm">Limpar</a>
+        }
+    </form>
+    <a asp-area="Admin" asp-controller="Admin" asp-action="PersonalNovo" class="btn btn-primary btn-sm">
+        + Cadastrar profissional
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c.8-3.4 3.5-5.2 7-5.2s6.2 1.8 7 5.2"/><path d="M17.5 5.5l2 2-4.5 4.5H13v-2z"/></svg>
+        </span>
+        <strong>Nenhum profissional encontrado</strong>
+        @if (string.IsNullOrEmpty(ViewBag.Busca as string))
+        {
+            <small>Use o botão "+ Cadastrar profissional" para adicionar o primeiro.</small>
+        }
+        else
+        {
+            <small>Tente outra busca ou limpe o filtro.</small>
+        }
+    </div>
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var p in Model)
+        {
+            var iniciais = string.Concat(p.NomeCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(x => char.ToUpper(x[0])));
+            <div class="lista-item">
+                <span class="avatar" aria-hidden="true">@iniciais</span>
+                <div class="lista-info">
+                    <strong>@p.NomeCompleto</strong>
+                    <small>
+                        @(string.IsNullOrEmpty(p.RegistroProfissional) ? "Sem CREF informado" : p.RegistroProfissional)
+                        · @(string.IsNullOrEmpty(p.Especialidade) ? "sem especialidade" : p.Especialidade)
+                        · @p.QtdAlunos aluno(s) · @p.QtdTreinos treino(s)
+                        · Cadastro: @p.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")
+                    </small>
+                </div>
+                <div class="lista-acoes lista-acoes-multiplo">
+                    <span class="chip @(p.ContaAtiva ? "chip-verde" : "chip-cinza")">@(p.ContaAtiva ? "Ativo" : "Inativo")</span>
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="PersonalDetalhe" asp-route-id="@p.Id" class="btn btn-ghost btn-sm">Detalhes</a>
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="PersonalEditar" asp-route-id="@p.Id" class="btn btn-ghost btn-sm">Editar</a>
+                    <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="PersonalAlternarStatus" asp-route-id="@p.Id"
+                          onsubmit="return confirm('@(p.ContaAtiva ? "Desativar a conta de" : "Reativar a conta de") @p.NomeCompleto?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm">@(p.ContaAtiva ? "Desativar" : "Ativar")</button>
+                    </form>
+                    <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="PersonalExcluir" asp-route-id="@p.Id"
+                          onsubmit="return confirm('Excluir o profissional &quot;@p.NomeCompleto&quot;? Os @p.QtdTreinos treino(s) criados por ele serão removidos e os @p.QtdAlunos aluno(s) ficarão sem personal. Esta ação não pode ser desfeita.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}

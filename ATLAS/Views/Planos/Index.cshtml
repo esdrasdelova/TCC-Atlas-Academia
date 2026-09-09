@@ -1,0 +1,72 @@
+@model List<PlanoItem>
+@{
+    ViewData["Title"] = "Planos";
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Planos</p>
+        <h1 class="reveal">Invista na sua <span class="txt-verde">evolução</span>.</h1>
+        <p class="reveal">
+            Sem taxas escondidas e sem letras miúdas. Escolha o plano ideal para o seu momento
+            — todos incluem acesso ao app de treinos da Atlas.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+    <div class="precos-grid">
+        @foreach (var plano in Model)
+        {
+            <article class="preco-card @(plano.Destaque ? "destaque" : "") reveal">
+                @if (plano.Destaque)
+                {
+                    <span class="preco-selo">Mais escolhido</span>
+                }
+                <span class="preco-nome">@plano.Nome</span>
+                <span class="preco-valor">@plano.Preco</span>
+                <span class="preco-periodo">@plano.Periodo</span>
+                <p class="preco-desc">@plano.Descricao</p>
+                <ul class="preco-lista">
+                    @foreach (var beneficio in plano.Beneficios)
+                    {
+                        <li>@beneficio</li>
+                    }
+                </ul>
+                <a asp-controller="Agendamento" asp-action="Index" class="btn @(plano.Destaque ? "btn-primary" : "btn-ghost")">Começar agora</a>
+            </article>
+        }
+    </div>
+
+    <section style="margin-top:5.5rem;">
+        <p class="kicker reveal">Compare</p>
+        <h2 class="bloco-titulo reveal">O que está <span class="txt-verde">incluído</span></h2>
+
+        <div style="overflow-x:auto; margin-top:2rem;" class="reveal">
+            <table class="tabela-comparativo">
+                <thead>
+                    <tr>
+                        <th>Recurso</th>
+                        <th>Mensal</th>
+                        <th>Trimestral</th>
+                        <th>Anual</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Acesso livre à musculação</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>App de treinos Atlas</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Avaliação física inicial</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Treinamento funcional</td><td class="no">&mdash;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Acompanhamento de personal</td><td class="no">&mdash;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Pilates (2x por semana)</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Reavaliação física periódica</td><td class="no">&mdash;</td><td class="no">Mensal</td><td class="no">Trimestral</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="form-nota reveal" style="margin-top:1.2rem;">
+            Valores promocionais para novos alunos. Consulte condições de fidelidade na recepção.
+        </p>
+    </section>
+</div>

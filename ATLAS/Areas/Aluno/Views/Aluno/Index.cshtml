@@ -1,0 +1,81 @@
+﻿@model AlunoDashboardViewModel
+@{
+    var nome = ViewData["UsuarioNome"] as string ?? "Aluno";
+    var primeiroNome = nome.Split(' ')[0];
+    var atualizado = Model.TreinoAtualizadoEm.HasValue
+        ? $"atualizado em {Model.TreinoAtualizadoEm.Value.ToString("dd/MM/yyyy")}"
+        : "aguardando ficha";
+}
+
+<div class="saudacao">
+    <h2>Olá, <em>@primeiroNome</em>!</h2>
+    <p>Bem-vindo à sua área de treinamento.</p>
+</div>
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="aviso">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+<div class="painel-grid">
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Seu treino</span>
+            <span class="card-icone"><partial name="_Icone" model='@("dumbbell")' /></span>
+        </div>
+        @if (Model.TemTreino)
+        {
+            <strong class="card-valor">@Model.TreinoAtualNome — <em>@Model.TreinoAtualFoco</em></strong>
+            <p>@Model.TreinoAtualExercicios exercícios · @atualizado</p>
+        }
+        else
+        {
+            <strong class="card-valor">Sem treino <em>ativo</em></strong>
+            <p>Seu personal ainda não publicou uma ficha para você.</p>
+        }
+        <div class="card-acoes">
+            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Treinos" class="btn btn-primary btn-sm">Ver meus treinos</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Seu personal</span>
+            <span class="card-icone"><partial name="_Icone" model='@("badge")' /></span>
+        </div>
+        <strong class="card-valor">@Model.PersonalNome</strong>
+        <p>Personal Trainer · CREF @(Model.PersonalRegistro ?? "—")</p>
+        <div class="card-acoes">
+            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Perfil" class="btn btn-ghost btn-sm">Meu perfil</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Próxima avaliação</span>
+            <span class="card-icone"><partial name="_Icone" model='@("pulse")' /></span>
+        </div>
+        @if (Model.ProximaAvaliacao.HasValue)
+        {
+            <strong class="card-valor">@Model.ProximaAvaliacao.Value.ToString("dd/MM/yyyy")</strong>
+            <p>Avaliação física com medidas e testes de carga.</p>
+        }
+        else
+        {
+            <strong class="card-valor">A <em>agendar</em></strong>
+            <p>Fale com seu personal para marcar sua próxima avaliação.</p>
+        }
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Seu objetivo</span>
+            <span class="card-icone"><partial name="_Icone" model='@("bolt")' /></span>
+        </div>
+        <strong class="card-valor"><em>@(string.IsNullOrEmpty(Model.Objetivo) ? "A definir" : Model.Objetivo)</em></strong>
+        <p>Definido junto ao seu personal de acordo com o seu plano.</p>
+    </div>
+</div>

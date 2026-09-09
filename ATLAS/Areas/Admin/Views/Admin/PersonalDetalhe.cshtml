@@ -1,0 +1,90 @@
+@model PersonalTrainer
+@{
+    var iniciais = string.Concat(Model.NomeCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+    var alunosAtivos = Model.Alunos.Count(a => a.Status == ATLAS.Models.Enums.StatusConta.Ativa);
+}
+
+<div class="saudacao">
+    <h2>Ficha do profissional · <em>@Model.NomeCompleto</em></h2>
+    <p>Dados completos, carteira de alunos e treinos criados.</p>
+</div>
+
+<div style="display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; margin-bottom:1.8rem;">
+    <span class="avatar" style="width:64px;height:64px;font-size:1.3rem;" aria-hidden="true">@iniciais</span>
+    <div>
+        <strong style="font-family:var(--font-display); font-size:1.25rem;">@Model.NomeCompleto</strong>
+        <p style="margin:0.15rem 0 0; color:var(--muted); font-size:0.9rem;">@Model.Email · @Model.Telefone</p>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:0.7rem; flex-wrap:wrap;">
+        <span class="chip @(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "chip-verde" : "chip-cinza")">
+            @(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Conta ativa" : "Conta inativa")
+        </span>
+        <a asp-area="Admin" asp-controller="Admin" asp-action="PersonalEditar" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Editar</a>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="PersonalAlternarStatus" asp-route-id="@Model.Id"
+              onsubmit="return confirm('@(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Desativar" : "Ativar") a conta de @Model.NomeCompleto?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm">@(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Desativar conta" : "Ativar conta")</button>
+        </form>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="PersonalExcluir" asp-route-id="@Model.Id"
+              onsubmit="return confirm('Excluir o profissional &quot;@Model.NomeCompleto&quot;? Os @Model.TreinosCriados.Count treino(s) criados por ele serão removidos e os @Model.Alunos.Count aluno(s) ficarão sem personal. Esta ação não pode ser desfeita.');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+        </form>
+    </div>
+</div>
+
+<div class="painel-grid">
+    <div class="card">
+        <span class="card-label">Registro / Especialidade</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@(string.IsNullOrEmpty(Model.RegistroProfissional) ? "CREF não informado" : Model.RegistroProfissional)</strong>
+        <p>@(string.IsNullOrEmpty(Model.Especialidade) ? "Sem especialidade informada" : Model.Especialidade)</p>
+    </div>
+    <div class="card">
+        <span class="card-label">Alunos vinculados</span>
+        <strong class="card-valor"><em>@Model.Alunos.Count</em></strong>
+        <p>@alunosAtivos com conta ativa.</p>
+    </div>
+    <div class="card">
+        <span class="card-label">Treinos criados</span>
+        <strong class="card-valor">@Model.TreinosCriados.Count</strong>
+        <p>Cadastrado em @Model.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")</p>
+    </div>
+</div>
+
+<div class="painel-secao" style="margin-top:2rem; margin-bottom:0.9rem;">
+    <h2>Carteira de alunos</h2>
+    <span>Alunos sob responsabilidade deste profissional</span>
+</div>
+
+@if (Model.Alunos.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.7 5.5-4.7s4.9 1.7 5.5 4.7"/><path d="M15.5 5.4a3.2 3.2 0 0 1 0 5.2"/><path d="M17.3 14.6c1.8.6 3 2 3.4 4.4"/></svg>
+        </span>
+        <strong>Nenhum aluno vinculado</strong>
+        <small>Vincule alunos a este personal pela edição da ficha do aluno.</small>
+    </div>
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var aluno in Model.Alunos.OrderBy(a => a.NomeCompleto))
+        {
+            <div class="lista-item">
+                <div class="lista-info">
+                    <strong>@aluno.NomeCompleto</strong>
+                    <small>@aluno.Email · @aluno.Treinos.Count treino(s)</small>
+                </div>
+                <div class="lista-acoes lista-acoes-multiplo">
+                    <span class="chip @(aluno.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "chip-verde" : "chip-cinza")">@(aluno.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Ativo" : "Inativo")</span>
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="AlunoDetalhe" asp-route-id="@aluno.Id" class="btn btn-ghost btn-sm">Ver ficha</a>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<a asp-area="Admin" asp-controller="Admin" asp-action="Personais" class="btn btn-ghost btn-sm" style="margin-top:1.8rem;">
+    &larr; Voltar para profissionais
+</a>

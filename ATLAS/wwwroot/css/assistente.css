@@ -1,0 +1,335 @@
+/* ── Assistente Atlas — Premium Dark Theme ─────────────────────────── */
+
+.assistente-botao {
+    position: fixed;
+    right: 1.4rem;
+    bottom: 1.4rem;
+    z-index: 1200;
+    width: 58px;
+    height: 58px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid rgba(184, 255, 61, 0.28);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 26%, rgba(184, 255, 61, 0.16), transparent 55%),
+        linear-gradient(150deg, #1d201c 0%, #111410 100%);
+    color: #dcff8f;
+    cursor: pointer;
+    box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.45),
+        0 0 0 1px rgba(184, 255, 61, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                box-shadow 0.3s ease,
+                border-color 0.3s ease,
+                background 0.3s ease;
+}
+
+/* Anel de respiração — pulso suave que indica "vivo", sem assustar */
+.assistente-botao::before {
+    content: "";
+    position: absolute;
+    inset: -2px;
+    border-radius: 50%;
+    border: 1px solid rgba(184, 255, 61, 0.4);
+    animation: assistenteRespira 3.4s ease-out infinite;
+    pointer-events: none;
+}
+@keyframes assistenteRespira {
+    0% { transform: scale(1); opacity: 0.5; }
+    70%, 100% { transform: scale(1.45); opacity: 0; }
+}
+
+/* Brilho superior sutil (efeito vidro) */
+.assistente-botao::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), transparent 42%);
+    pointer-events: none;
+}
+
+.assistente-icone {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.assistente-icone svg { display: block; filter: drop-shadow(0 0 6px rgba(184, 255, 61, 0.35)); }
+
+.assistente-rotulo {
+    position: absolute;
+    right: calc(100% + 0.85rem);
+    top: 50%;
+    transform: translateY(-50%) translateX(8px);
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
+    background: rgba(16, 19, 18, 0.88);
+    border: 1px solid rgba(184, 255, 61, 0.2);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    font-family: var(--font-body);
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.assistente-botao:hover,
+.assistente-botao[aria-expanded="true"] {
+    transform: translateY(-2px);
+    border-color: rgba(184, 255, 61, 0.5);
+    background:
+        radial-gradient(circle at 32% 26%, rgba(184, 255, 61, 0.22), transparent 55%),
+        linear-gradient(150deg, #21241d 0%, #141710 100%);
+    box-shadow:
+        0 14px 34px rgba(0, 0, 0, 0.5),
+        0 0 24px rgba(184, 255, 61, 0.18),
+        0 0 0 1px rgba(184, 255, 61, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.assistente-botao:hover .assistente-rotulo,
+.assistente-botao:focus-visible .assistente-rotulo,
+.assistente-botao[aria-expanded="true"] .assistente-rotulo {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+.assistente-botao:hover .assistente-icone { transform: rotate(8deg) scale(1.08); }
+.assistente-botao[aria-expanded="true"] .assistente-icone { transform: rotate(45deg); }
+
+.assistente-botao:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 3px var(--bg),
+        0 0 0 5px rgba(184, 255, 61, 0.6),
+        0 10px 28px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .assistente-botao::before { animation: none; opacity: 0; }
+    .assistente-botao,
+    .assistente-icone,
+    .assistente-rotulo { transition-duration: 0.01ms; }
+}
+
+/* ── Painel ──────────────────────────────────────────────────────── */
+
+.assistente-painel {
+    position: fixed;
+    right: 1.4rem;
+    bottom: calc(1.4rem + 3.6rem + 0.8rem);
+    z-index: 1300;
+    width: min(370px, calc(100vw - 2rem));
+    max-height: min(560px, calc(100vh - 9rem));
+    display: flex;
+    flex-direction: column;
+    background: #101013;
+    color: #f0f2ef;
+    border: 1px solid rgba(184, 255, 61, 0.08);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), 0 0 1px rgba(184, 255, 61, 0.1);
+    transform-origin: bottom right;
+    animation: assistenteEntrada 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.assistente-painel.fechando {
+    animation-name: assistenteSaida;
+    animation-duration: 0.18s;
+}
+@keyframes assistenteEntrada {
+    from { opacity: 0; transform: translateY(18px) scale(0.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes assistenteSaida {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to { opacity: 0; transform: translateY(12px) scale(0.97); }
+}
+
+/* ── Cabeçalho ───────────────────────────────────────────────────── */
+
+.assistente-topo {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.95rem 1rem;
+    background: linear-gradient(135deg, #141a14 0%, #101013 60%);
+    border-bottom: 1px solid rgba(184, 255, 61, 0.08);
+}
+
+.assistente-logo img {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+    background: #000;
+    padding: 5px;
+    border-radius: 50%;
+    display: block;
+}
+
+.assistente-topo strong {
+    display: block;
+    font-size: 0.98rem;
+    color: #fff;
+}
+
+.assistente-topo small {
+    color: #8a9a8e;
+    font-size: 0.76rem;
+}
+
+.assistente-fechar {
+    margin-left: auto;
+    background: none;
+    border: none;
+    color: #8a9a8e;
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.2rem 0.45rem;
+    border-radius: 8px;
+    transition: color 0.15s ease, background 0.15s ease;
+}
+
+.assistente-fechar:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Corpo / scroll ──────────────────────────────────────────────── */
+
+.assistente-corpo {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(184, 255, 61, 0.15) transparent;
+}
+
+.assistente-corpo::-webkit-scrollbar {
+    width: 5px;
+}
+
+.assistente-corpo::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.assistente-corpo::-webkit-scrollbar-thumb {
+    background: rgba(184, 255, 61, 0.15);
+    border-radius: 10px;
+}
+
+/* ── Intro / Tópicos ─────────────────────────────────────────────── */
+
+.assistente-intro {
+    margin: 0 0 0.85rem;
+    font-size: 0.88rem;
+    color: #b0bfb4;
+}
+
+.assistente-topicos {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.assistente-topico {
+    text-align: left;
+    padding: 0.68rem 0.9rem;
+    border: 1px solid rgba(184, 255, 61, 0.07);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    color: #e2e8e3;
+    font-family: inherit;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background 0.18s ease,
+                border-color 0.18s ease,
+                transform 0.15s ease;
+}
+
+.assistente-topico::before {
+    content: "? ";
+    font-weight: 700;
+    color: #b8ff3d;
+}
+
+.assistente-topico:hover {
+    background: rgba(184, 255, 61, 0.06);
+    border-color: rgba(184, 255, 61, 0.22);
+}
+
+/* ── Voltar ──────────────────────────────────────────────────────── */
+
+.assistente-voltar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.8rem;
+    background: none;
+    border: none;
+    color: #b8ff3d;
+    font-family: inherit;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.25rem 0.4rem;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+
+.assistente-voltar:hover {
+    background: rgba(184, 255, 61, 0.08);
+}
+
+/* ── Resposta ────────────────────────────────────────────────────── */
+
+.assistente-resposta h3 {
+    margin: 0 0 0.6rem;
+    font-size: 1rem;
+    line-height: 1.35;
+    color: #fff;
+}
+
+.assistente-texto {
+    font-size: 0.9rem;
+    line-height: 1.65;
+    color: #d5ddd6;
+    white-space: pre-line;
+}
+
+/* ── Rodapé ──────────────────────────────────────────────────────── */
+
+.assistente-rodape {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.7rem 1rem;
+    font-size: 0.72rem;
+    line-height: 1.4;
+    color: #6e7e72;
+    border-top: 1px solid rgba(184, 255, 61, 0.06);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.assistente-rodape svg {
+    flex-shrink: 0;
+    color: #6e7e72;
+}
+
+/* ── Responsivo ──────────────────────────────────────────────────── */
+
+@media (max-width: 480px) {
+    .assistente-rotulo { display: none; }
+    .assistente-botao { right: 0.9rem; bottom: 0.9rem; }
+    .assistente-painel {
+        right: 0.8rem;
+        left: 0.8rem;
+        width: auto;
+        bottom: calc(0.8rem + 3.6rem + 0.6rem);
+    }
+}

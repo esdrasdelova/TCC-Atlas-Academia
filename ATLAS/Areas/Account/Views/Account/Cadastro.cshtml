@@ -1,0 +1,53 @@
+﻿@{
+    Layout = "_LayoutAuth";
+    var aviso = TempData["Aviso"] as string;
+}
+
+<div class="auth-card">
+    <h1>Comece sua <span class="txt-verde">evolução</span></h1>
+    <p>Crie sua conta de aluno e tenha acesso aos treinos disponibilizados pelo seu personal.</p>
+
+    @if (!string.IsNullOrEmpty(aviso))
+    {
+        <div class="aviso">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+            <span>@aviso</span>
+        </div>
+    }
+
+    <form asp-action="Cadastro" method="post">
+        @Html.AntiForgeryToken()
+        <div class="form-field">
+            <label for="nomeCompleto">Nome completo</label>
+            <input type="text" id="nomeCompleto" name="nomeCompleto" placeholder="Ex.: João Silva" required autocomplete="name" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email" />
+            </div>
+            <div class="form-field">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-0000" required autocomplete="tel" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label for="dataNascimento">Data de nascimento</label>
+            <input type="date" id="dataNascimento" name="dataNascimento" required autocomplete="bday" />
+        </div>
+
+        <div class="form-field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="Mínimo de 6 caracteres" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Criar minha conta</button>
+        <p class="form-nota" style="margin-top:1rem;">Seus dados serão armazenados com segurança e usados apenas para o acompanhamento do seu treino.</p>
+    </form>
+</div>
+
+<p class="auth-alt">
+    Já tem conta? <a asp-action="Login">Fazer login</a>
+</p>

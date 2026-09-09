@@ -1,0 +1,38 @@
+@{
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-card">
+    <h1>Redefinir <span class="txt-verde">senha</span></h1>
+    <p>Informe o codigo que enviamos para o seu e-mail e escolha uma nova senha.</p>
+
+    <form asp-action="RedefinirSenha" method="post">
+        @Html.AntiForgeryToken()
+
+        <div class="form-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" value="@ViewBag.Email" required readonly autocomplete="email" />
+        </div>
+
+        <div class="form-field">
+            <label for="codigo">Codigo de 6 digitos</label>
+            <input type="text" id="codigo" name="codigo" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="one-time-code" />
+        </div>
+
+        <div class="form-field">
+            <label for="novaSenha">Nova senha</label>
+            <input type="password" id="novaSenha" name="novaSenha" placeholder="Minimo 6 caracteres" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <div class="form-field">
+            <label for="confirmarSenha">Confirmar nova senha</label>
+            <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Repita a nova senha" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Redefinir senha</button>
+    </form>
+</div>
+
+<p class="auth-alt">
+    Nao recebeu o codigo? <a asp-action="EsqueciSenha">Solicitar novamente</a>
+</p>

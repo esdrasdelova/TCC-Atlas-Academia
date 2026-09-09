@@ -1,0 +1,58 @@
+﻿@{
+    Layout = "_LayoutAuth";
+    var aviso = TempData["Aviso"] as string;
+    var sucesso = TempData["Sucesso"] as string;
+}
+
+<div class="auth-card">
+    <h1>Bem-vindo de <span class="txt-verde">volta</span></h1>
+    <p>Acesse sua conta para acompanhar seus treinos e agendamentos.</p>
+
+    @if (!string.IsNullOrEmpty(sucesso))
+    {
+        <div class="aviso">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>@sucesso</span>
+        </div>
+    }
+
+    @if (!string.IsNullOrEmpty(aviso))
+    {
+        <div class="aviso">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+            <span>@aviso</span>
+        </div>
+    }
+
+    <form asp-action="Login" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
+
+        <div class="form-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email" />
+        </div>
+
+        <div class="form-field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Entrar</button>
+        <p class="form-nota" style="margin-top:1rem;">Aluno, personal ou administrador — o sistema identificará seu perfil no acesso.</p>
+        <p class="form-nota" style="margin-top:0.5rem;"><a asp-action="EsqueciSenha">Esqueci minha senha</a></p>
+    </form>
+
+    <details class="contas-demo">
+        <summary>Contas de demonstração</summary>
+        <ul>
+            <li><strong>Administrador</strong> — admin@atlasct.com.br · senha <code>123456</code></li>
+            <li><strong>Personal</strong> — carlos.mendes&#64;atlasct.com.br · senha <code>123456</code></li>
+            <li><strong>Aluno</strong> — joao.silva@email.com · senha <code>123456</code></li>
+        </ul>
+    </details>
+</div>
+
+<p class="auth-alt">
+    Ainda não tem conta? <a asp-action="Cadastro">Cadastre-se</a>
+</p>
