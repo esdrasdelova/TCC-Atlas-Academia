@@ -20,6 +20,9 @@ builder.Services.AddSingleton<ISiteConfigService, SiteConfigService>();
 builder.Services.Configure<EmailConfig>(builder.Configuration.GetSection("Email"));
 builder.Services.AddSingleton<IEmailService, EmailService>();
 
+// Cache em memória: usado para limite de tentativas/solicitações na recuperação de senha.
+builder.Services.AddMemoryCache();
+
 // Banco de dados (PostgreSQL no Supabase) + serviços de negócio.
 // A connection string vem de appsettings/env, com a senha injetada via dotnet user-secrets.
 builder.Services.AddDbContext<AtlasDbContext>(options =>

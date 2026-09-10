@@ -37,7 +37,9 @@ public class EmailService : IEmailService
             {
                 EnableSsl = _config.Smtp.UsarSsl,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(_config.Remetente, _config.Senha),
+                Credentials = new NetworkCredential(
+                    string.IsNullOrWhiteSpace(_config.Smtp.Usuario) ? _config.Remetente : _config.Smtp.Usuario,
+                    _config.Senha),
                 DeliveryMethod = SmtpDeliveryMethod.Network
             };
 
@@ -65,7 +67,7 @@ public class EmailService : IEmailService
         }
     }
 
-    public async Task EnviarCodigoRecuperacaoAsync(string emailDestino, string codigo, string nomeUsuario)
+    public async Task<bool> EnviarCodigoRecuperacaoAsync(string emailDestino, string codigo, string nomeUsuario)
     {
         var primeiroNome = (nomeUsuario ?? string.Empty).Split(' ').FirstOrDefault() ?? string.Empty;
         var corpo = string.Concat(
@@ -75,7 +77,7 @@ public class EmailService : IEmailService
             "<table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" width=\"100%\" style=\"max-width:560px;background-color:#18181b;border-radius:12px;padding:32px;\">",
             "<tr><td style=\"font-size:22px;font-weight:600;color:#ffffff;\">Atlas Centro de Treinamento</td></tr>",
             "<tr><td style=\"padding-top:8px;font-size:15px;color:#a1a1aa;\">Olá, ", System.Net.WebUtility.HtmlEncode(primeiroNome), ".</td></tr>",
-            "<tr><td style=\"padding-top:16px;font-size:15px;color:#e4e4e7;line-height:1.5;\">Use o código abaixo para redefinir a sua senha. O código expira em <strong style=\"color:#b8ff3d;\">15 minutos</strong>.</td></tr>",
+            "<tr><td style=\"padding-top:16px;font-size:15px;color:#e4e4e7;line-height:1.5;\">Recebemos uma solicitação para redefinir a senha da sua conta. Use o código abaixo para criar uma nova senha. O código expira em <strong style=\"color:#b8ff3d;\">15 minutos</strong>.</td></tr>",
             "<tr><td align=\"center\" style=\"padding:28px 0;\">",
             "<div style=\"display:inline-block;background-color:#101013;border:2px solid #b8ff3d;border-radius:8px;padding:18px 28px;\">",
             "<span style=\"font-family:'Courier New',Consolas,monospace;font-size:32px;font-weight:700;letter-spacing:8px;color:#b8ff3d;\">", System.Net.WebUtility.HtmlEncode(codigo), "</span>",
@@ -87,19 +89,12 @@ public class EmailService : IEmailService
 
         var mensagem = new EmailMensagem
         {
-            Assunto = "Atlas - Codigo de recuperacao de senha",
+            Assunto = "Atlas - Código de recuperação de senha",
             Corpo = corpo,
             Html = true
         };
         mensagem.Para.Add(emailDestino);
 
-        try
-        {
-            await EnviarAsync(mensagem);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Falha ao enviar código de recuperação para {Email}", emailDestino);
-        }
+        return await EnviarAsync(mensagem);
     }
 }

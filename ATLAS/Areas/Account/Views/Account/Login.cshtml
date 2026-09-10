@@ -26,6 +26,10 @@
 
     <form asp-action="Login" method="post">
         @Html.AntiForgeryToken()
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+        }
         <input type="hidden" name="returnUrl" value="@ViewBag.ReturnUrl" />
 
         <div class="form-field">

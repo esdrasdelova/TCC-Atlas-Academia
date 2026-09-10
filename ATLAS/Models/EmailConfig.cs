@@ -21,7 +21,13 @@ public class EmailConfig
 
 public class SmtpConfig
 {
-    public string Host { get; set; } = "smtp.gmail.com";
+    public string Host { get; set; } = "smtp-relay.brevo.com";
     public int Porta { get; set; } = 587;
     public bool UsarSsl { get; set; } = true;
+
+    /// <summary>
+    /// Usuário do login SMTP. Se vazio, o serviço usa o Remetente como usuário
+    /// (comportamento do Gmail). No Brevo, o login é o e-mail da conta Brevo.
+    /// </summary>
+    public string Usuario { get; set; } = string.Empty;
 }

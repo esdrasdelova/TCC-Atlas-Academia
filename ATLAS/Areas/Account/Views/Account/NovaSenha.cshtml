@@ -1,0 +1,37 @@
+@{
+    Layout = "_LayoutAuth";
+}
+
+<div class="auth-card">
+    <h1>Nova <span class="txt-verde">senha</span></h1>
+    <p>Escolha uma nova senha para a sua conta.</p>
+
+    <form asp-action="NovaSenha" method="post">
+        @Html.AntiForgeryToken()
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+        }
+
+        <div class="form-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" name="email" value="@ViewBag.Email" required readonly autocomplete="email" />
+        </div>
+
+        <div class="form-field">
+            <label for="novaSenha">Nova senha</label>
+            <input type="password" id="novaSenha" name="novaSenha" placeholder="Mínimo 6 caracteres" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <div class="form-field">
+            <label for="confirmarSenha">Confirmar nova senha</label>
+            <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Repita a nova senha" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Alterar senha</button>
+    </form>
+</div>
+
+<p class="auth-alt">
+    <a asp-action="Login">Voltar para o login</a>
+</p>
