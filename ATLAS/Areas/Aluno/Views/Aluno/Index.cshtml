@@ -5,6 +5,12 @@
     var atualizado = Model.TreinoAtualizadoEm.HasValue
         ? $"atualizado em {Model.TreinoAtualizadoEm.Value.ToString("dd/MM/yyyy")}"
         : "aguardando ficha";
+
+    var telDigitos = new string((Model.PersonalTelefone ?? "").Where(char.IsDigit).ToArray());
+    var temPersonal = !string.Equals(Model.PersonalNome, "A definir", StringComparison.OrdinalIgnoreCase);
+    var zap = temPersonal && telDigitos.Length >= 10
+        ? $"https://wa.me/{(telDigitos.Length <= 11 ? "55" : "")}{telDigitos}?text={Uri.EscapeDataString("Olá! Sou aluno da Atlas e gostaria de falar sobre meu treino.")}"
+        : null;
 }
 
 <div class="saudacao">
@@ -24,7 +30,7 @@
     <div class="card">
         <div class="card-topo">
             <span class="card-label">Seu treino</span>
-            <span class="card-icone"><partial name="_Icone" model='@("dumbbell")' /></span>
+            <span class="card-icone card-icone--round"><partial name="_Icone" model='@("dumbbell")' /></span>
         </div>
         @if (Model.TemTreino)
         {
@@ -44,38 +50,75 @@
     <div class="card">
         <div class="card-topo">
             <span class="card-label">Seu personal</span>
-            <span class="card-icone"><partial name="_Icone" model='@("badge")' /></span>
+            <span class="card-icone card-icone--round"><partial name="_Icone" model='@("badge")' /></span>
         </div>
         <strong class="card-valor">@Model.PersonalNome</strong>
         <p>Personal Trainer · CREF @(Model.PersonalRegistro ?? "—")</p>
         <div class="card-acoes">
-            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Perfil" class="btn btn-ghost btn-sm">Meu perfil</a>
+            @if (zap != null)
+            {
+                <a href="@zap" target="_blank" rel="noopener" class="btn btn-primary btn-sm">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.7-5.2A8.5 8.5 0 1 1 21 11.5z"/></svg>
+                    Falar com personal
+                </a>
+            }
+            else
+            {
+                <a asp-area="Aluno" asp-controller="Aluno" asp-action="Perfil" class="btn btn-ghost btn-sm">Meu perfil</a>
+            }
         </div>
     </div>
 
     <div class="card">
         <div class="card-topo">
             <span class="card-label">Próxima avaliação</span>
-            <span class="card-icone"><partial name="_Icone" model='@("pulse")' /></span>
+            <span class="card-icone card-icone--round"><partial name="_Icone" model='@("pulse")' /></span>
         </div>
         @if (Model.ProximaAvaliacao.HasValue)
         {
             <strong class="card-valor">@Model.ProximaAvaliacao.Value.ToString("dd/MM/yyyy")</strong>
-            <p>Avaliação física com medidas e testes de carga.</p>
+            <p>Avaliação física com medidas e acompanhamento do seu personal.</p>
         }
         else
         {
             <strong class="card-valor">A <em>agendar</em></strong>
             <p>Fale com seu personal para marcar sua próxima avaliação.</p>
         }
+        <div class="card-acoes">
+            @if (Model.ProximaAvaliacao.HasValue)
+            {
+                <a asp-area="Aluno" asp-controller="Aluno" asp-action="Avaliacao" class="btn btn-ghost btn-sm">Ver avaliação</a>
+            }
+            else
+            {
+                <a asp-area="" asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-sm">Agendar avaliação</a>
+            }
+        </div>
     </div>
 
     <div class="card">
         <div class="card-topo">
             <span class="card-label">Seu objetivo</span>
-            <span class="card-icone"><partial name="_Icone" model='@("bolt")' /></span>
+            <span class="card-icone card-icone--round"><partial name="_Icone" model='@("bolt")' /></span>
         </div>
         <strong class="card-valor"><em>@(string.IsNullOrEmpty(Model.Objetivo) ? "A definir" : Model.Objetivo)</em></strong>
         <p>Definido junto ao seu personal de acordo com o seu plano.</p>
+        <div class="card-acoes">
+            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Perfil" class="btn btn-ghost btn-sm">
+                @(string.IsNullOrEmpty(Model.Objetivo) ? "Definir objetivo" : "Editar objetivo")
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Frequência</span>
+            <span class="card-icone card-icone--round"><partial name="_Icone" model='@("space")' /></span>
+        </div>
+        <strong class="card-valor">Ainda sem <em>registros</em></strong>
+        <p>O acompanhamento das suas presenças nos treinos estará disponível em breve.</p>
+        <div class="card-acoes">
+            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Treinos" class="btn btn-ghost btn-sm">Ver meus treinos</a>
+        </div>
     </div>
 </div>

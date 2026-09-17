@@ -1,0 +1,35 @@
+@model List<Treino>
+
+<div class="saudacao">
+    <h2>Histórico de <em>treinos</em></h2>
+    <p>Todas as fichas que o seu personal já preparou para você.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "dumbbell", Titulo = "Nenhum treino no histórico", Descricao = "Quando seu personal publicar a primeira ficha, ela aparecerá aqui — tanto a atual quanto as anteriores.", RotuloCta = "Ir para o início", UrlCta = "/aluno" })' />
+}
+else
+{
+    <div class="painel-secao">
+        <h2>Fichas registradas</h2>
+        <span>@Model.Count ficha(s)</span>
+    </div>
+    <div class="lista-painel">
+        @foreach (var treino in Model)
+        {
+            <div class="lista-item @(treino.Ativo ? "lista-item-destaque" : "")">
+                <span class="card-icone card-icone--round" aria-hidden="true"><partial name="_Icone" model='@("dumbbell")' /></span>
+                <div class="lista-info">
+                    <strong>@treino.Nome</strong>
+                    <small>@(string.IsNullOrWhiteSpace(treino.Objetivo) ? "Sem foco definido" : treino.Objetivo) · criada em @treino.DataCriacao.ToString("dd/MM/yyyy")</small>
+                </div>
+                <div class="lista-acoes">
+                    <span class="chip @(treino.Ativo ? "chip-verde" : "chip-cinza")">@(treino.Ativo ? "Em uso" : "Anterior")</span>
+                    <a asp-area="Aluno" asp-controller="Aluno" asp-action="Detalhe" asp-route-id="@treino.Id" class="btn btn-ghost btn-sm">Abrir ficha</a>
+                </div>
+            </div>
+        }
+    </div>
+}

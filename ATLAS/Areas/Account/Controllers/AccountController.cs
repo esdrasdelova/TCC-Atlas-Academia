@@ -143,6 +143,7 @@ public class AccountController : Controller
         }
 
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        Response.Cookies.Delete("Atlas.Auth", new CookieOptions { Path = "/" });
         TempData["Aviso"] = "Sessão encerrada. Até logo!";
         return RedirectToAction(nameof(Login));
     }

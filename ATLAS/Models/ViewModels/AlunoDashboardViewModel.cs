@@ -19,6 +19,9 @@ public class AlunoDashboardViewModel
 
     public string? PersonalRegistro { get; set; }
 
+    /// <summary>Telefone do personal (WhatsApp) usado no botão "Falar com personal".</summary>
+    public string? PersonalTelefone { get; set; }
+
     public DateTime? ProximaAvaliacao { get; set; }
 
     public string? Objetivo { get; set; }

@@ -92,6 +92,7 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AtlasDbContext>();
     BancoInicializador.GarantirSchema(db);
+    BancoInicializador.GarantirNotificacoesLidas(db);
     DbSeeder.Seed(db);
     DbSeeder.CorrigirSenhasPendentes(db);
 }

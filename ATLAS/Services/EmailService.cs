@@ -1,12 +1,17 @@
 using System.Net;
+using System.Net.Http.Headers;
 using System.Net.Mail;
+using System.Text;
+using System.Text.Json;
 using ATLAS.Models;
 using Microsoft.Extensions.Options;
 
 namespace ATLAS.Services;
 
 /// <summary>
-/// Envio real de e-mails via SMTP usando System.Net.Mail (sem dependências externas).
+/// Envio de e-mails com dois provedores suportados:
+///  1. Resend (API REST em HTTPS — chave permanente, nenhuma porta de SMTP).
+///  2. SMTP via System.Net.Mail (Gmail/Brevo) como fallback, sem dependências externas.
 /// </summary>
 public class EmailService : IEmailService
 {
@@ -19,14 +24,25 @@ public class EmailService : IEmailService
         _logger = logger;
     }
 
-    public async Task<bool> EnviarAsync(EmailMensagem mensagem)
+    public Task<bool> EnviarAsync(EmailMensagem mensagem)
     {
-        if (_config is null ||
-            string.IsNullOrWhiteSpace(_config.Remetente) ||
-            string.IsNullOrWhiteSpace(_config.Senha) ||
-            mensagem.Para.Count == 0)
+        if (string.IsNullOrWhiteSpace(_config.Remetente) || mensagem.Para.Count == 0)
         {
-            _logger.LogWarning("E-mail não enviado: configuração de SMTP incompleta ou destinatário ausente.");
+            _logger.LogWarning("E-mail não enviado: remetente ou destinatário ausente.");
+            return Task.FromResult(false);
+        }
+
+        // Resend (API) tem prioridade quando configurado — é o caminho permanente.
+        return !string.IsNullOrWhiteSpace(_config.Resend?.ApiKey)
+            ? EnviarViaResendAsync(mensagem)
+            : EnviarViaSmtpAsync(mensagem);
+    }
+
+    private async Task<bool> EnviarViaSmtpAsync(EmailMensagem mensagem)
+    {
+        if (string.IsNullOrWhiteSpace(_config.Senha))
+        {
+            _logger.LogWarning("E-mail não enviado: senha SMTP não configurada (Email__Senha).");
             return false;
         }
 
@@ -63,6 +79,46 @@ public class EmailService : IEmailService
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao enviar e-mail para {Para}", mensagem.Para);
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Envio via API REST do Resend (https://api.resend.com/emails). HTTPS puro,
+    /// sem senha rotativa — a chave re_ é permanente e funciona de qualquer máquina.
+    /// </summary>
+    private async Task<bool> EnviarViaResendAsync(EmailMensagem mensagem)
+    {
+        try
+        {
+            var payload = new Dictionary<string, object?>
+            {
+                ["from"] = $"{_config.NomeExibicao} <{_config.Remetente}>",
+                ["to"] = mensagem.Para,
+                ["subject"] = mensagem.Assunto,
+                [mensagem.Html ? "html" : "text"] = mensagem.Corpo
+            };
+
+            using var http = new HttpClient();
+            http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _config.Resend!.ApiKey);
+            using var resposta = await http.PostAsync(
+                "https://api.resend.com/emails",
+                new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json"));
+
+            var corpoResposta = await resposta.Content.ReadAsStringAsync();
+            if (!resposta.IsSuccessStatusCode)
+            {
+                _logger.LogError("Resend falhou ({Status}): {Corpo} para {Para}",
+                    (int)resposta.StatusCode, corpoResposta, string.Join(", ", mensagem.Para));
+                return false;
+            }
+
+            _logger.LogInformation("E-mail enviado via Resend para {Para} (assunto: {Assunto})", string.Join(", ", mensagem.Para), mensagem.Assunto);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Falha ao enviar via Resend para {Para}", mensagem.Para);
             return false;
         }
     }

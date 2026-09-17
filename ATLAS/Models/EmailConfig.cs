@@ -1,9 +1,15 @@
 namespace ATLAS.Models;
 
 /// <summary>
-/// Configuração do envio de e-mails via SMTP (seção "Email" do appsettings.json).
-/// Para Gmail, o Remetente precisa usar uma "Senha de app" (com verificação em 2
-/// etapas ativada) — a senha comum da conta não funciona no SMTP do Gmail.
+/// Configuração do envio de e-mails (seção "Email" do appsettings.json e
+/// variáveis de ambiente com prefixo Email__, ex.: Email__Senha).
+///
+/// Dois caminhos suportados, na ordem de preferência:
+///  1. Resend (API HTTPS — credencial permanente, funciona de qualquer máquina):
+///     basta Email__Resend__ApiKey. Sem SMTP, sem senha de app.
+///  2. SMTP (System.Net.Mail) — Gmail, Brevo, etc. Para Gmail o Remetente precisa
+///     de "senha de app" (verificação em 2 etapas), que o Google rotaciona — por
+///     isso em projetos reais prefira Resend ou Brevo (chaves permanentes).
 /// </summary>
 public class EmailConfig
 {
@@ -17,6 +23,15 @@ public class EmailConfig
     public string Destino { get; set; } = string.Empty;
 
     public SmtpConfig Smtp { get; set; } = new();
+
+    /// <summary>Caminho preferido de envio quando a chave está preenchida.</summary>
+    public ResendConfig Resend { get; set; } = new();
+}
+
+public class ResendConfig
+{
+    /// <summary>Chave de API permanente (ex.: re_xxxxxxxx). Define a env Email__Resend__ApiKey.</summary>
+    public string ApiKey { get; set; } = string.Empty;
 }
 
 public class SmtpConfig

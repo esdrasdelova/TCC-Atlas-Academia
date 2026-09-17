@@ -167,7 +167,7 @@ body.dash-body {
     text-transform: uppercase;
     letter-spacing: 0.16em;
 }
-.dash-user { margin-left: auto; }
+.dash-user { margin-left: auto; display: flex; align-items: center; gap: 0.9rem; }
 
 .dash-content {
     flex: 1;
@@ -251,6 +251,10 @@ body.dash-body {
     color: var(--green);
 }
 .card-icone .icone { width: 22px; height: 22px; }
+.card-icone--round { border-radius: 50%; }
+.vazio-estado .btn { margin-top: 1.1rem; }
+.notif-linha { text-decoration: none; }
+.notif-linha:hover { color: inherit; }
 
 .painel-secao {
     margin: 2.4rem 0 1.1rem;
@@ -797,4 +801,119 @@ button.sidebar-sair {
     cursor: pointer;
     font-family: inherit;
     width: 100%;
+}
+
+/* ---------- Sino de notificações (área do aluno) ---------- */
+.dash-bell { position: relative; }
+.dash-bell-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    cursor: pointer;
+    transition: var(--transition);
+}
+.dash-bell-btn:hover,
+.dash-bell-btn[aria-expanded="true"] {
+    color: var(--green);
+    border-color: var(--green-line);
+}
+.dash-bell-btn svg { width: 18px; height: 18px; }
+.dash-bell-count {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 17px;
+    height: 17px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: var(--green);
+    color: #0c1000;
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notif-drop {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 0.6rem);
+    width: min(340px, calc(100vw - 2rem));
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    z-index: 130;
+    overflow: hidden;
+    text-align: left;
+}
+.notif-drop-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--border);
+}
+.notif-drop-head strong {
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 0.8rem;
+}
+.notif-drop-head a {
+    color: var(--green);
+    font-size: 0.74rem;
+}
+.notif-lista {
+    max-height: 320px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.notif-item { border-bottom: 1px solid var(--border); }
+.notif-item:last-child { border-bottom: none; }
+.notif-item a {
+    display: block;
+    padding: 0.8rem 1rem;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.notif-item a:hover { background: var(--surface-2); }
+.notif-item strong {
+    display: block;
+    font-size: 0.88rem;
+    color: var(--text);
+}
+.notif-item a > span {
+    display: block;
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 0.15rem;
+    line-height: 1.45;
+}
+.notif-ponto {
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-right: 0.45rem;
+}
+.notif-item.alerta .notif-ponto { background: #ffb45c; }
+.notif-vazio {
+    margin: 0;
+    padding: 1.7rem 1.2rem;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.86rem;
 }

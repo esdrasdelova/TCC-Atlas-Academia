@@ -16,6 +16,9 @@ public class SegurancaHttpMiddleware
         "/api/",
         "/login",
         "/cadastro",
+        "/logout",
+        "/esqueci-senha",
+        "/redefinir-senha",
         "/sem-acesso"
     ];
 

@@ -107,6 +107,66 @@
         });
     }
 
+    // Sino de notificações do dashboard
+    const dashBell = document.getElementById("dashBell");
+    const dashBellBtn = document.getElementById("dashBellBtn");
+    const notifDrop = document.getElementById("notifDrop");
+    const dashBellCount = document.getElementById("dashBellCount");
+
+    // Persiste as notificações atuais como lidas (badge zera no banco) e esconde o contador.
+    function marcarNotificacoesLidas() {
+        if (!notifDrop || !dashBellCount) return;
+        const chaves = Array.from(notifDrop.querySelectorAll(".notif-item[data-chave]"))
+            .map(function (item) { return item.getAttribute("data-chave"); })
+            .filter(Boolean);
+        if (!chaves.length) return;
+
+        const tokenMeta = document.querySelector('meta[name="csrf-token"]');
+        fetch("/aluno/notificacoes/lidas", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": tokenMeta ? tokenMeta.content : ""
+            },
+            body: JSON.stringify({ chaves: chaves }),
+            credentials: "same-origin"
+        }).catch(function () { /* silencioso: o badge volta na próxima carga da página */ });
+        dashBellCount.remove();
+    }
+
+    if (dashBell && dashBellBtn && notifDrop) {
+        var marcouAbertura = false;
+        function setNotif(open) {
+            notifDrop.hidden = !open;
+            dashBellBtn.setAttribute("aria-expanded", String(open));
+            if (open && !marcouAbertura) {
+                marcouAbertura = true;
+                marcarNotificacoesLidas();
+            }
+        }
+        dashBellBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            setNotif(notifDrop.hidden);
+        });
+        document.addEventListener("click", function (e) {
+            if (!dashBell.contains(e.target)) setNotif(false);
+        });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape") setNotif(false);
+        });
+    }
+
+    // Limpeza de estado local ao sair — defensivo, além do cookie e do servidor.
+    function limparStorageAtlas() {
+        try {
+            Object.keys(localStorage).forEach(function (k) { if (k.indexOf("atlas:") === 0) localStorage.removeItem(k); });
+            Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("atlas:") === 0) sessionStorage.removeItem(k); });
+        } catch (e) { /* armazenamento indisponível — o logout segue normalmente */ }
+    }
+    document.querySelectorAll(".sair-form").forEach(function (form) {
+        form.addEventListener("submit", limparStorageAtlas);
+    });
+
     // Loading states em formulários de exclusão/ação
     document.querySelectorAll("form[onsubmit]").forEach(function (form) {
         form.addEventListener("submit", function () {

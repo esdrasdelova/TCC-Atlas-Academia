@@ -1,0 +1,21 @@
+@inject ATLAS.Services.ISiteConfigService SiteConfig
+@{
+    var somenteDigitos = new string((SiteConfig.Obter().Telefone ?? string.Empty).Where(char.IsDigit).ToArray());
+    var whatsappUrl = string.IsNullOrEmpty(somenteDigitos) ? null : $"https://wa.me/{somenteDigitos}";
+}
+
+<div class="saudacao">
+    <h2>Pagamentos e <em>faturas</em></h2>
+    <p>Consulte suas faturas e a situação financeira da sua matrícula em um só lugar.</p>
+</div>
+
+@if (whatsappUrl != null)
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "badge", Titulo = "Nenhuma fatura registrada", Descricao = "A 2ª via e o histórico de pagamentos do seu plano ficarão disponíveis aqui assim que a administração vincular sua matrícula. Precisa de algo agora?", RotuloCta = "Falar com a academia", UrlCta = whatsappUrl })' />
+}
+else
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "badge", Titulo = "Nenhuma fatura registrada", Descricao = "A 2ª via e o histórico de pagamentos do seu plano ficarão disponíveis aqui assim que a administração vincular sua matrícula.", RotuloCta = "Ir para o início", UrlCta = "/aluno" })' />
+}

@@ -1,4 +1,6 @@
-﻿@{
+﻿@using Microsoft.AspNetCore.Antiforgery
+@inject IAntiforgery Antiforgery
+@{
     var titulo = ViewData["Titulo"] as string ?? "Painel";
     var usuarioNome = ViewData["UsuarioNome"] as string ?? "Usuário";
     var usuarioPapel = ViewData["UsuarioPapel"] as string ?? string.Empty;
@@ -6,6 +8,10 @@
                         .Where(p => p.Length > 1).Take(2).Select(p => char.ToUpper(p[0])));
     if (string.IsNullOrEmpty(iniciais)) { iniciais = "AT"; }
     var sidebarPartial = ViewData["Sidebar"] as string;
+    var mostrarSino = ViewData["MostrarSino"] is bool mostrar && mostrar;
+    var notificacoes = ViewData["Notificacoes"] as List<AlunoNotificacaoItem> ?? new List<AlunoNotificacaoItem>();
+    var naoLidas = notificacoes.Count(n => !n.Lida);
+    var tokensCsrf = Antiforgery.GetAndStoreTokens(Context);
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -16,6 +22,7 @@
     <meta name="theme-color" content="#0a0a0b" />
     <meta name="color-scheme" content="dark" />
     <title>@ViewData["Title"] - Atlas Centro de Treinamento</title>
+    <meta name="csrf-token" content="@tokensCsrf.RequestToken" />
     <link rel="icon" href="~/images/logo-atlas.png" asp-append-version="true" />
     <link rel="apple-touch-icon" href="~/images/logo-atlas.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -56,7 +63,7 @@
                     }
                 </span>
             </div>
-            <form method="post" asp-area="" asp-controller="Account" asp-action="Logout" class="sair-form"
+            <form method="post" asp-area="Account" asp-controller="Account" asp-action="Logout" class="sair-form"
                   onsubmit="return confirm('Encerrar sua sessão?');">
                 @Html.AntiForgeryToken()
                 <button type="submit" class="sidebar-sair" title="Encerrar sessão">Sair
@@ -73,8 +80,44 @@
                 <span></span><span></span><span></span>
             </button>
             <h1 class="dash-titulo">@titulo</h1>
-            <div class="dash-user" aria-hidden="true">
-                <span class="avatar avatar-sm">@iniciais</span>
+            <div class="dash-user">
+                @if (mostrarSino)
+                {
+                    <div class="dash-bell" id="dashBell">
+                        <button type="button" class="dash-bell-btn" id="dashBellBtn" aria-label="Ver notificações" aria-haspopup="true" aria-expanded="false" aria-controls="notifDrop">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.3 20a2 2 0 0 0 3.4 0"/></svg>
+                            @if (naoLidas > 0)
+                            {
+                                <span class="dash-bell-count" id="dashBellCount" aria-hidden="true">@naoLidas</span>
+                            }
+                        </button>
+                        <div class="notif-drop" id="notifDrop" hidden>
+                            <div class="notif-drop-head">
+                                <strong>Notificações</strong>
+                                <a asp-area="Aluno" asp-controller="Aluno" asp-action="Notificacoes">Ver todas</a>
+                            </div>
+                            @if (notificacoes.Count == 0)
+                            {
+                                <p class="notif-vazio">Nenhuma notificação no momento.</p>
+                            }
+                            else
+                            {
+                                <ul class="notif-lista">
+                                    @foreach (var n in notificacoes)
+                                    {
+                                        <li class="notif-item @n.Tipo" data-chave="@n.Chave">
+                                            <a href="@n.Url">
+                                                <strong><span class="notif-ponto" aria-hidden="true"></span>@n.Titulo</strong>
+                                                <span>@n.Descricao</span>
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </div>
+                    </div>
+                }
+                <span class="avatar avatar-sm" aria-hidden="true">@iniciais</span>
             </div>
         </header>
 

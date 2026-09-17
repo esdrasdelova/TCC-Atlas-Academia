@@ -23,6 +23,7 @@ public class AtlasDbContext : DbContext
     public DbSet<Treino> Treinos => Set<Treino>();
     public DbSet<TreinoExercicio> TreinoExercicios => Set<TreinoExercicio>();
     public DbSet<Agendamento> Agendamentos => Set<Agendamento>();
+    public DbSet<NotificacaoLida> NotificacoesLidas => Set<NotificacaoLida>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,5 +105,16 @@ public class AtlasDbContext : DbContext
             .WithMany()
             .HasForeignKey(a => a.PersonalId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // Notificações lidas por aluno — uma única marca por chave.
+        modelBuilder.Entity<NotificacaoLida>()
+            .HasOne(n => n.Aluno)
+            .WithMany()
+            .HasForeignKey(n => n.AlunoId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<NotificacaoLida>()
+            .HasIndex(n => new { n.AlunoId, n.Chave })
+            .IsUnique();
     }
 }
