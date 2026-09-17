@@ -65,6 +65,25 @@
         </div>
     </section>
 
+    <section style="margin-top:6rem;" id="galeria">
+        <p class="kicker reveal">Conheça a Atlas</p>
+        <h2 class="bloco-titulo reveal">Nossa <span class="txt-verde">estrutura</span></h2>
+        <div class="grid-3 galeria" style="margin-top:2.2rem;">
+            <figure class="galeria-item reveal" data-galeria="fachada" role="button" tabindex="0" aria-label="Ampliar fotos da fachada">
+                <img src="~/images/fachada.jpg" alt="Fachada da Atlas" asp-append-version="true" />
+                <figcaption>Nossa fachada</figcaption>
+            </figure>
+            <figure class="galeria-item reveal" data-galeria="academia" role="button" tabindex="0" aria-label="Ampliar fotos da academia">
+                <img src="~/images/academia.jpg" alt="Academia Atlas" asp-append-version="true" />
+                <figcaption>Academia</figcaption>
+            </figure>
+            <figure class="galeria-item reveal" data-galeria="pilates" role="button" tabindex="0" aria-label="Ampliar fotos do espaço pilates e fisioterapia">
+                <img src="~/images/pilates.jpg" alt="Espaço pilates e fisioterapia" asp-append-version="true" />
+                <figcaption>Espaço pilates e fisioterapia</figcaption>
+            </figure>
+        </div>
+    </section>
+
     <section style="margin-top:6rem;">
         <p class="kicker reveal">Como atuamos</p>
         <h2 class="bloco-titulo reveal">Nossa <span class="txt-verde">atuação</span></h2>
@@ -91,4 +110,14 @@
             <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-xl">Agende seu atendimento</a>
         </div>
     </section>
+</div>
+
+<div class="galeria-modal" id="galeriaModal" aria-hidden="true" aria-label="Galeria de fotos">
+    <button type="button" class="galeria-close" id="galeriaFechar" aria-label="Fechar galeria" title="Fechar">&times;</button>
+    <div class="galeria-modal-inner">
+        <img class="galeria-slide" id="galeriaSlide" src="" alt="" />
+        <button type="button" class="galeria-nav galeria-prev" id="galeriaPrev" aria-label="Foto anterior">&#8249;</button>
+        <button type="button" class="galeria-nav galeria-next" id="galeriaNext" aria-label="Próxima foto">&#8250;</button>
+        <div class="galeria-counter" id="galeriaCounter">1 / 1</div>
+    </div>
 </div>

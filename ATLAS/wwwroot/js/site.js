@@ -212,4 +212,75 @@
     } else {
         revealEls.forEach(function (el) { el.classList.add("visible"); });
     }
+
+    // Galeria de fotos da página Sobre (modal com navegação e X transparente)
+    const galeriaFotos = {
+        fachada: ["/images/fachada.jpg"],
+        academia: ["/images/academia.jpg", "/images/mais-equipamento.jpg", "/images/mais-foto-dos-equipamentos.jpg"],
+        pilates: ["/images/pilates.jpg", "/images/espaco-pilates.jpg"]
+    };
+
+    const galeriaModal = document.getElementById("galeriaModal");
+    const galeriaSlide = document.getElementById("galeriaSlide");
+    const galeriaCounter = document.getElementById("galeriaCounter");
+    const galeriaPrev = document.getElementById("galeriaPrev");
+    const galeriaNext = document.getElementById("galeriaNext");
+    const galeriaFechar = document.getElementById("galeriaFechar");
+
+    if (galeriaModal && galeriaSlide) {
+        let fotosAtuais = [];
+        let indiceAtual = 0;
+
+        function mostraSlide(i) {
+            indiceAtual = (i + fotosAtuais.length) % fotosAtuais.length;
+            galeriaSlide.src = fotosAtuais[indiceAtual];
+            galeriaSlide.alt = galeriaSlide.alt || "";
+            if (galeriaCounter) {
+                galeriaCounter.textContent = (indiceAtual + 1) + " / " + fotosAtuais.length;
+            }
+            if (galeriaPrev) galeriaPrev.hidden = fotosAtuais.length === 1;
+            if (galeriaNext) galeriaNext.hidden = fotosAtuais.length === 1;
+        }
+
+        function abreGaleria(nome) {
+            fotosAtuais = galeriaFotos[nome] || [];
+            if (!fotosAtuais.length) return;
+            indiceAtual = 0;
+            mostraSlide(0);
+            galeriaModal.classList.add("aberto");
+            galeriaModal.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+        }
+
+        function fechaGaleria() {
+            galeriaModal.classList.remove("aberto");
+            galeriaModal.setAttribute("aria-hidden", "true");
+            galeriaSlide.src = "";
+            document.body.style.overflow = "";
+        }
+
+        document.querySelectorAll(".galeria-item[data-galeria]").forEach(function (item) {
+            function abrir() { abreGaleria(item.getAttribute("data-galeria")); }
+            item.addEventListener("click", abrir);
+            item.addEventListener("keydown", function (e) {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    abrir();
+                }
+            });
+        });
+
+        if (galeriaFechar) galeriaFechar.addEventListener("click", fechaGaleria);
+        if (galeriaPrev) galeriaPrev.addEventListener("click", function () { mostraSlide(indiceAtual - 1); });
+        if (galeriaNext) galeriaNext.addEventListener("click", function () { mostraSlide(indiceAtual + 1); });
+        galeriaModal.addEventListener("click", function (e) {
+            if (e.target === galeriaModal) fechaGaleria();
+        });
+        document.addEventListener("keydown", function (e) {
+            if (!galeriaModal.classList.contains("aberto")) return;
+            if (e.key === "Escape") fechaGaleria();
+            if (e.key === "ArrowLeft") mostraSlide(indiceAtual - 1);
+            if (e.key === "ArrowRight") mostraSlide(indiceAtual + 1);
+        });
+    }
 })();
