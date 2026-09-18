@@ -23,7 +23,8 @@ public class HomeController : Controller
         var viewModel = new HomeViewModel
         {
             Destaques = config.Destaques,
-            Modalidades = config.Modalidades
+            Modalidades = config.Modalidades,
+            Horarios = config.Horarios
         };
 
         return View(viewModel);

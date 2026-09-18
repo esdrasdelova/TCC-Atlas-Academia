@@ -40,22 +40,26 @@
 
 
 
-<section class="section destaques" id="destaques">
+<section class="section horarios" id="horarios">
     <div class="container">
         <div class="section-head reveal">
-            <p class="kicker">A Atlas em números</p>
-            <h2 class="section-title">Uma estrutura feita para <span class="txt-gradiente">resultados</span></h2>
+            <p class="kicker">Horários de funcionamento</p>
+            <h2 class="section-title">A porta está <span class="txt-gradiente">aberta</span> quando você precisa</h2>
+            <p class="lead">Treine nos horários que cabem na sua rotina. Prepare-se, calce o tênis e venha.</p>
         </div>
-        <div class="destaques-grid reveal">
-            @foreach (var item in Model.Destaques)
+        <div class="horarios-grid reveal">
+            @foreach (var item in Model.Horarios)
             {
-                <article class="destaque-card">
-                    <div class="destaque-icone">
+                <article class="horario-card @(item.Fechado ? "horario-fechado" : "")">
+                    <div class="horario-icone">
                         <partial name="_Icone" model="item.Icone" />
                     </div>
-                    <strong class="destaque-valor">@item.Valor</strong>
-                    <h3>@item.Titulo</h3>
-                    <p>@item.Descricao</p>
+                    <h3>@item.Dia</h3>
+                    <strong class="horario-tempo">@item.Horario</strong>
+                    @if (!string.IsNullOrEmpty(item.Detalhe))
+                    {
+                        <p>@item.Detalhe</p>
+                    }
                 </article>
             }
         </div>

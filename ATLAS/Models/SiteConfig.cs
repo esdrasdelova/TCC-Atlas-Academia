@@ -17,6 +17,9 @@ public class SiteConfig
     public string HorarioSemana { get; set; } = string.Empty;
     public string HorarioSabado { get; set; } = string.Empty;
 
+    /// <summary>Dias/horários exibidos na seção de funcionamento da Home.</summary>
+    public List<HorarioItem> Horarios { get; set; } = new();
+
     /// <summary>URL de incorporação do Google Maps (iframe, sem API key).</summary>
     public string MapaEmbedUrl { get; set; } = string.Empty;
 

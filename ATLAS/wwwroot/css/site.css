@@ -788,6 +788,121 @@ svg, img { flex-shrink: 0; }
     max-width: 30ch;
 }
 
+/* ---------- Horários de funcionamento ---------- */
+.horarios {
+    position: relative;
+    background: var(--bg-soft);
+    border-block: 1px solid var(--border);
+    padding: 4.5rem 0;
+    overflow: hidden;
+}
+.horarios::before {
+    content: "";
+    position: absolute;
+    inset: -30% -10%;
+    background:
+        radial-gradient(ellipse 40% 45% at 20% 0%, rgba(184, 255, 61, 0.06), transparent 65%),
+        radial-gradient(ellipse 40% 45% at 80% 100%, rgba(86, 204, 242, 0.04), transparent 65%);
+    pointer-events: none;
+}
+
+.horarios-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+.horario-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--surface), rgba(20, 20, 22, 0.4));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 2.2rem 1.8rem 2rem;
+    overflow: hidden;
+    transition: var(--transition);
+}
+.horario-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, var(--green), var(--green-line), transparent);
+    opacity: 0.85;
+    transition: opacity 0.25s ease;
+}
+.horario-card:hover {
+    border-color: var(--green-line);
+    box-shadow: var(--shadow-green);
+    transform: translateY(-4px);
+}
+
+.horario-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 46px;
+    height: 46px;
+    border-radius: 12px;
+    background: var(--green-soft);
+    color: var(--green);
+    border: 1px solid transparent;
+    margin-bottom: 1.4rem;
+    transition: var(--transition);
+}
+.horario-card:hover .horario-icone { border-color: var(--green-line); }
+
+.horario-card h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.92rem;
+    color: var(--muted);
+    margin-bottom: 0.7rem;
+}
+
+.horario-tempo {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(1.35rem, 2.6vw, 1.85rem);
+    line-height: 1.2;
+    color: var(--text);
+    letter-spacing: 0.01em;
+}
+
+.horario-card p {
+    margin-top: 0.8rem;
+    color: var(--muted-2);
+    font-size: 0.84rem;
+    line-height: 1.55;
+}
+
+/* Card "fechado" (domingo/feriados) */
+.horario-card.horario-fechado {
+    background: linear-gradient(180deg, var(--surface-2), rgba(16, 16, 19, 0.55));
+    border-style: dashed;
+}
+.horario-card.horario-fechado::before {
+    background: linear-gradient(90deg, var(--muted-2), transparent);
+    opacity: 0.5;
+}
+.horario-card.horario-fechado:hover {
+    border-color: var(--border-strong);
+    box-shadow: none;
+}
+.horario-card.horario-fechado .horario-icone {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--muted);
+}
+.horario-card.horario-fechado .horario-tempo {
+    color: var(--muted);
+    font-size: 1.5rem;
+}
+
 /* ---------- Sobre ---------- */
 .sobre-inner {
     display: grid;
@@ -1714,7 +1829,7 @@ svg, img { flex-shrink: 0; }
     .pagina { padding: 3.5rem 0 4.5rem; }
 }
 @media (max-width: 1024px) {
-    .destaques-grid, .modalidades-grid { grid-template-columns: repeat(2, 1fr); }
+    .destaques-grid, .modalidades-grid, .horarios-grid { grid-template-columns: repeat(2, 1fr); }
     .sobre-inner { grid-template-columns: 1fr; gap: 3.5rem; }
     .footer-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1757,7 +1872,7 @@ svg, img { flex-shrink: 0; }
     .section { padding: 4.5rem 0; }
     .destaques { padding: 3.5rem 0; }
 
-    .destaques-grid, .modalidades-grid { grid-template-columns: 1fr; }
+    .destaques-grid, .modalidades-grid, .horarios-grid { grid-template-columns: 1fr; }
 
     .destaque-card + .destaque-card { padding-left: 0.4rem; }
     .hero-visual { width: 100%; }
