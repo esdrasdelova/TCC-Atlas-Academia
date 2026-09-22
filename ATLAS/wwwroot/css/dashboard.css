@@ -124,6 +124,15 @@ body.dash-body {
 }
 .avatar-sm { width: 36px; height: 36px; font-size: 0.8rem; }
 
+/* Avatar do topo direito — agora é link para o perfil do usuário logado */
+.perfil-link { text-decoration: none; transition: var(--transition); }
+.perfil-link:hover,
+.perfil-link:focus-visible {
+    border-color: var(--green);
+    color: var(--green);
+    box-shadow: 0 0 0 3px rgba(184, 255, 61, 0.16);
+}
+
 .sidebar-overlay {
     position: fixed;
     inset: 0;

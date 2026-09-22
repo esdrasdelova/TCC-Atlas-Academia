@@ -1,0 +1,74 @@
+@model PerfilContaViewModel
+@{
+    var iniciais = string.Concat(Model.NomeCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+}
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="aviso">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (TempData["Aviso"] is string aviso)
+{
+    <div class="aviso aviso-erro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>@aviso</span>
+    </div>
+}
+
+<div class="saudacao">
+    <h2>Meu <em>perfil</em></h2>
+    <p>Seus dados de administrador na conta Atlas.</p>
+</div>
+
+<div style="display:flex; align-items:center; gap:1.2rem; margin-bottom:1.6rem;">
+    <span class="avatar" style="width:96px; height:96px; font-size:1.8rem;" aria-hidden="true">@iniciais</span>
+    <div>
+        <strong style="font-family:var(--font-display); font-size:1.3rem;">@Model.NomeCompleto</strong>
+        <p style="margin:0.15rem 0 0;"><small style="color:var(--green); text-transform:uppercase; letter-spacing:0.14em; font-size:0.72rem;">@Model.Papel · Atlas desde @Model.MembroDesde · Conta @(Model.ContaAtiva ? "Ativa" : "Inativa")</small></p>
+    </div>
+</div>
+
+<form method="post" asp-area="Admin" asp-controller="Admin" asp-action="AtualizarPerfil">
+    @Html.AntiForgeryToken()
+
+    <div class="card" style="max-width:640px;">
+        <div class="form-field">
+            <label for="nomeCompleto">Nome completo</label>
+            <input type="text" id="nomeCompleto" name="nomeCompleto" value="@Model.NomeCompleto" required />
+        </div>
+
+        <div class="form-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" value="@Model.Email" readonly
+                   style="opacity:0.6; cursor:not-allowed;" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="telefone">Telefone</label>
+                <input type="text" id="telefone" name="telefone" value="@Model.Telefone"
+                       placeholder="(11) 99999-0000" />
+            </div>
+            <div class="form-field">
+                <label>Data de nascimento</label>
+                <input type="text" value="@(Model.DataNascimento?.ToString("dd/MM/yyyy") ?? "—")" readonly
+                       style="opacity:0.6; cursor:not-allowed;" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Tipo de conta</label>
+            <input type="text" value="@Model.Papel" readonly
+                   style="opacity:0.6; cursor:not-allowed;" />
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.7rem; margin-top:0.6rem;">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Perfil" class="btn btn-ghost btn-sm">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button>
+        </div>
+    </div>
+</form>

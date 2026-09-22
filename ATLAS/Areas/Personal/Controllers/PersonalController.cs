@@ -269,6 +269,70 @@ public class PersonalController : Controller
         return View(exercicios);
     }
 
+    // ---------------------------------------------------------------------
+    // PERFIL DA PRÓPRIA CONTA
+    // ---------------------------------------------------------------------
+
+    [HttpGet("perfil")]
+    public async Task<IActionResult> Perfil()
+    {
+        ViewData["Title"] = "Meu Perfil";
+        PrepararViewData("Meu Perfil");
+
+        var personal = await _db.Personais.AsNoTracking()
+            .FirstOrDefaultAsync(p => p.Id == UsuarioId);
+
+        if (personal == null)
+        {
+            TempData["Aviso"] = "Conta não encontrada no banco de dados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var perfil = new PerfilContaViewModel
+        {
+            NomeCompleto = personal.NomeCompleto,
+            Email = personal.Email,
+            Telefone = personal.Telefone,
+            DataNascimento = personal.DataNascimento == default ? null : personal.DataNascimento,
+            MembroDesde = personal.CriadoEm.ToString("MMMM 'de' yyyy"),
+            ContaAtiva = personal.Status == StatusConta.Ativa,
+            Papel = Permissoes.Personal,
+            RegistroProfissional = personal.RegistroProfissional,
+            Especialidade = personal.Especialidade
+        };
+
+        return View(perfil);
+    }
+
+    [HttpPost("perfil")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AtualizarPerfil(
+        string nomeCompleto, string telefone, string? especialidade)
+    {
+        var personal = await _db.Personais.FirstOrDefaultAsync(p => p.Id == UsuarioId);
+        if (personal == null)
+        {
+            TempData["Aviso"] = "Conta não encontrada no banco de dados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!string.IsNullOrWhiteSpace(nomeCompleto))
+            personal.NomeCompleto = nomeCompleto.Trim();
+
+        if (!string.IsNullOrWhiteSpace(telefone))
+            personal.Telefone = telefone.Trim();
+
+        // CREF é credencial verificada pela administração — não editável aqui.
+        personal.Especialidade = string.IsNullOrWhiteSpace(especialidade)
+            ? null
+            : especialidade.Trim();
+
+        await _db.SaveChangesAsync();
+
+        TempData["Sucesso"] = "Perfil atualizado com sucesso!";
+        return RedirectToAction(nameof(Perfil));
+    }
+
     /// <summary>Validações além das anotações do modelo.</summary>
     private async Task<bool> FormularioValidoAsync(TreinoFormViewModel form)
     {

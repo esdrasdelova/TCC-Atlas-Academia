@@ -15,8 +15,8 @@ public interface IEmailService
     Task<bool> EnviarAsync(EmailMensagem mensagem);
 
     /// <summary>
-    /// Envia o código de recuperação de senha para o e-mail informado.
-    /// Retorna true apenas se o e-mail foi realmente entregue no servidor SMTP.
+    /// Envia o link (token opaco) de redefinição de senha para o e-mail informado.
+    /// Retorna true apenas se o e-mail foi realmente entregue ao provedor.
     /// </summary>
-    Task<bool> EnviarCodigoRecuperacaoAsync(string emailDestino, string codigo, string nomeUsuario);
+    Task<bool> EnviarLinkRecuperacaoAsync(string emailDestino, string linkRedefinicao, string nomeUsuario);
 }

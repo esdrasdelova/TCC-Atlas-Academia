@@ -13,9 +13,9 @@ using EntidadeAluno = ATLAS.Models.Entities.Aluno;
 namespace ATLAS.Areas.Admin.Controllers;
 
 /// <summary>
-/// Painel administrativo: dashboard com dados reais do banco e gestão completa
-/// de alunos, personais (professores) e treinos personalizados. Todas as ações
-/// exigem o papel Administrador — validado por cookie de autenticação.
+/// Painel administrativo: dashboard com dados reais do banco e gestÃ£o completa
+/// de alunos, personais (professores) e treinos personalizados. Todas as aÃ§Ãµes
+/// exigem o papel Administrador â€” validado por cookie de autenticaÃ§Ã£o.
 /// </summary>
 [Authorize(Roles = Permissoes.Administrador)]
 [Area("Admin")]
@@ -53,7 +53,7 @@ public class AdminController : Controller
     public async Task<IActionResult> Index()
     {
         ViewData["Title"] = "Painel Administrativo";
-        PrepararViewData("Visão Geral");
+        PrepararViewData("VisÃ£o Geral");
 
         var usuarios = await _db.Usuarios.AsNoTracking().ToListAsync();
         var modelo = new AdminDashboardViewModel
@@ -92,7 +92,7 @@ public class AdminController : Controller
     [HttpGet("alunos")]
     public async Task<IActionResult> Alunos(string? q)
     {
-        ViewData["Title"] = "Alunos — Administração";
+        ViewData["Title"] = "Alunos â€” AdministraÃ§Ã£o";
         PrepararViewData("Alunos");
         ViewBag.Busca = q;
 
@@ -269,7 +269,7 @@ public class AdminController : Controller
 
         TempData["Sucesso"] = aluno.Status == StatusConta.Ativa
             ? $"Conta de \"{aluno.NomeCompleto}\" ativada."
-            : $"Conta de \"{aluno.NomeCompleto}\" desativada — o aluno não conseguirá entrar.";
+            : $"Conta de \"{aluno.NomeCompleto}\" desativada â€” o aluno nÃ£o conseguirÃ¡ entrar.";
 
         return RedirectToAction(nameof(Alunos));
     }
@@ -284,8 +284,8 @@ public class AdminController : Controller
 
         if (aluno == null) return NotFound();
 
-        // Exclusão em cascata controlada no código: remove primeiro os treinos
-        // do aluno (e os itens são apagados pelo cascade do banco).
+        // ExclusÃ£o em cascata controlada no cÃ³digo: remove primeiro os treinos
+        // do aluno (e os itens sÃ£o apagados pelo cascade do banco).
         _db.Treinos.RemoveRange(aluno.Treinos);
         _db.Alunos.Remove(aluno);
         await _db.SaveChangesAsync();
@@ -293,7 +293,7 @@ public class AdminController : Controller
         _logger.LogWarning("ADM {AdmId} excluiu o aluno {AlunoId} e {QtdTreeinos} treino(s).",
             UsuarioId, id, aluno.Treinos.Count);
 
-        TempData["Sucesso"] = $"Aluno \"{aluno.NomeCompleto}\" excluído junto com {aluno.Treinos.Count} treino(s).";
+        TempData["Sucesso"] = $"Aluno \"{aluno.NomeCompleto}\" excluÃ­do junto com {aluno.Treinos.Count} treino(s).";
         return RedirectToAction(nameof(Alunos));
     }
 
@@ -302,7 +302,7 @@ public class AdminController : Controller
         var email = (form.Email ?? string.Empty).Trim().ToLower();
         if (await EmailEmUsoAsync(email, form.Id, ehAluno: true))
         {
-            ModelState.AddModelError(nameof(form.Email), "Já existe uma conta com este e-mail.");
+            ModelState.AddModelError(nameof(form.Email), "JÃ¡ existe uma conta com este e-mail.");
         }
 
         if (form.DataNascimento == default
@@ -310,7 +310,7 @@ public class AdminController : Controller
             || form.DataNascimento < new DateTime(1920, 1, 1))
         {
             ModelState.AddModelError(nameof(form.DataNascimento),
-                "Informe uma data de nascimento válida (mínimo 10 anos).");
+                "Informe uma data de nascimento vÃ¡lida (mÃ­nimo 10 anos).");
         }
 
         if (!ehEdicao && string.IsNullOrWhiteSpace(form.Senha))
@@ -335,7 +335,7 @@ public class AdminController : Controller
     [HttpGet("personais")]
     public async Task<IActionResult> Personais(string? q)
     {
-        ViewData["Title"] = "Profissionais — Administração";
+        ViewData["Title"] = "Profissionais â€” AdministraÃ§Ã£o";
         PrepararViewData("Profissionais (Personais)");
         ViewBag.Busca = q;
 
@@ -496,7 +496,7 @@ public class AdminController : Controller
 
         if (personal.Id == UsuarioId)
         {
-            TempData["Erro"] = "Você não pode desativar a sua própria conta.";
+            TempData["Erro"] = "VocÃª nÃ£o pode desativar a sua prÃ³pria conta.";
             return RedirectToAction(nameof(Personais));
         }
 
@@ -526,12 +526,12 @@ public class AdminController : Controller
 
         if (personal.Id == UsuarioId)
         {
-            TempData["Erro"] = "Você não pode excluir a sua própria conta enquanto estiver autenticado.";
+            TempData["Erro"] = "VocÃª nÃ£o pode excluir a sua prÃ³pria conta enquanto estiver autenticado.";
             return RedirectToAction(nameof(Personais));
         }
 
-        // Cascata controlada: treinos criados são removidos e os alunos ficam
-        // sem personal responsável (podendo ser reatribuídos depois).
+        // Cascata controlada: treinos criados sÃ£o removidos e os alunos ficam
+        // sem personal responsÃ¡vel (podendo ser reatribuÃ­dos depois).
         foreach (var aluno in personal.Alunos)
         {
             aluno.PersonalId = null;
@@ -544,8 +544,8 @@ public class AdminController : Controller
         _logger.LogWarning("ADM {AdmId} excluiu o personal {PersonalId} ({QuantosTreinos} treinos e {QuantosAlunos} alunos liberados).",
             UsuarioId, id, personal.TreinosCriados.Count, personal.Alunos.Count);
 
-        TempData["Sucesso"] = $"Profissional \"{personal.NomeCompleto}\" excluído. " +
-            $"{personal.TreinosCriados.Count} treino(s) removido(s) e {personal.Alunos.Count} aluno(s) liberado(s) para reatribuição.";
+        TempData["Sucesso"] = $"Profissional \"{personal.NomeCompleto}\" excluÃ­do. " +
+            $"{personal.TreinosCriados.Count} treino(s) removido(s) e {personal.Alunos.Count} aluno(s) liberado(s) para reatribuiÃ§Ã£o.";
         return RedirectToAction(nameof(Personais));
     }
 
@@ -554,13 +554,13 @@ public class AdminController : Controller
         var email = (form.Email ?? string.Empty).Trim().ToLower();
         if (await EmailEmUsoAsync(email, form.Id, ehAluno: false))
         {
-            ModelState.AddModelError(nameof(form.Email), "Já existe uma conta com este e-mail.");
+            ModelState.AddModelError(nameof(form.Email), "JÃ¡ existe uma conta com este e-mail.");
         }
 
         if (form.DataNascimento == default || form.DataNascimento > DateTime.UtcNow.AddYears(-16))
         {
             ModelState.AddModelError(nameof(form.DataNascimento),
-                "Informe uma data de nascimento válida (mínimo 16 anos).");
+                "Informe uma data de nascimento vÃ¡lida (mÃ­nimo 16 anos).");
         }
 
         if (!ehEdicao && string.IsNullOrWhiteSpace(form.Senha))
@@ -601,7 +601,7 @@ public class AdminController : Controller
     [HttpGet("treinos")]
     public async Task<IActionResult> Treinos()
     {
-        ViewData["Title"] = "Treinos Personalizados — Administração";
+        ViewData["Title"] = "Treinos Personalizados â€” AdministraÃ§Ã£o";
         PrepararViewData("Treinos Personalizados");
 
         var lista = await _treinos.ListarTodosComAlunoAsync();
@@ -612,7 +612,7 @@ public class AdminController : Controller
     [HttpGet("treinos/novo")]
     public async Task<IActionResult> TreinoNovo([FromQuery] int? alunoId)
     {
-        ViewData["Title"] = "Novo Treino — Administração";
+        ViewData["Title"] = "Novo Treino â€” AdministraÃ§Ã£o";
         PrepararViewData("Novo Treino");
 
         var form = new TreinoFormViewModel();
@@ -626,7 +626,7 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TreinoNovo(TreinoFormViewModel form)
     {
-        ViewData["Title"] = "Novo Treino — Administração";
+        ViewData["Title"] = "Novo Treino â€” AdministraÃ§Ã£o";
         PrepararViewData("Novo Treino");
 
         if (!await FormularioTreinoValidoAsync(form))
@@ -659,7 +659,7 @@ public class AdminController : Controller
         var treino = await _treinos.ObterTreinoCompletoAsync(id);
         if (treino == null) return NotFound();
 
-        ViewData["Title"] = "Editar Treino — Administração";
+        ViewData["Title"] = "Editar Treino â€” AdministraÃ§Ã£o";
         PrepararViewData("Editar Treino");
         ViewBag.NomeAluno = treino.Aluno.NomeCompleto;
 
@@ -694,7 +694,7 @@ public class AdminController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> TreinoEditar(int id, TreinoFormViewModel form)
     {
-        ViewData["Title"] = "Editar Treino — Administração";
+        ViewData["Title"] = "Editar Treino â€” AdministraÃ§Ã£o";
         PrepararViewData("Editar Treino");
 
         form.Id = id;
@@ -719,7 +719,7 @@ public class AdminController : Controller
     public async Task<IActionResult> TreinoExcluir(int id)
     {
         var ok = await _treinos.ExcluirAsync(id);
-        TempData[ok ? "Sucesso" : "Erro"] = ok ? "Treino excluído." : "Treino não encontrado.";
+        TempData[ok ? "Sucesso" : "Erro"] = ok ? "Treino excluÃ­do." : "Treino nÃ£o encontrado.";
         return RedirectToAction(nameof(Treinos));
     }
 
@@ -729,7 +729,7 @@ public class AdminController : Controller
     {
         var ok = await _treinos.AlternarPublicacaoAsync(id);
         if (!ok) return NotFound();
-        TempData["Sucesso"] = "Publicação do treino atualizada.";
+        TempData["Sucesso"] = "PublicaÃ§Ã£o do treino atualizada.";
         return RedirectToAction(nameof(Treinos));
     }
 
@@ -752,20 +752,20 @@ public class AdminController : Controller
 
         if (form.Exercicios.Count(e => e.ExercicioId > 0) == 0)
         {
-            ModelState.AddModelError(string.Empty, "Adicione pelo menos um exercício ao treino.");
+            ModelState.AddModelError(string.Empty, "Adicione pelo menos um exercÃ­cio ao treino.");
         }
 
         if (!await _db.Alunos.AnyAsync(a => a.Id == form.AlunoId))
         {
-            ModelState.AddModelError(nameof(form.AlunoId), "Selecione um aluno válido.");
+            ModelState.AddModelError(nameof(form.AlunoId), "Selecione um aluno vÃ¡lido.");
         }
 
         return ModelState.IsValid;
     }
 
     /// <summary>
-    /// Personal responsável pelo treino: usa o selecionado no formulário ou,
-    /// na ausência, o personal atual do aluno; sem nenhum dos dois, o próprio ADM.
+    /// Personal responsÃ¡vel pelo treino: usa o selecionado no formulÃ¡rio ou,
+    /// na ausÃªncia, o personal atual do aluno; sem nenhum dos dois, o prÃ³prio ADM.
     /// </summary>
     private async Task<int> ResolverPersonalDoTreinoAsync(TreinoFormViewModel form)
     {
@@ -799,7 +799,7 @@ public class AdminController : Controller
             .Select(a => new OpcaoSelect
             {
                 Id = a.Id,
-                Texto = $"{a.NomeCompleto} — {(string.IsNullOrEmpty(a.Objetivo) ? "sem objetivo" : a.Objetivo)}"
+                Texto = $"{a.NomeCompleto} â€” {(string.IsNullOrEmpty(a.Objetivo) ? "sem objetivo" : a.Objetivo)}"
             })
             .ToListAsync();
         ViewBag.PersonaisSelect = await _db.Personais
@@ -815,7 +815,7 @@ public class AdminController : Controller
     }
 
     // ---------------------------------------------------------------------
-    // MÓDULOS EM BREVE
+    // MÃ“DULOS EM BREVE
     // ---------------------------------------------------------------------
 
     [HttpGet("modalidades", Name = "AdminModalidades")]
@@ -825,7 +825,7 @@ public class AdminController : Controller
         return View("EmBreve", new EmBreveViewModel
         {
             Recurso = "Modalidades",
-            Descricao = "Gerenciar as modalidades e serviços oferecidos pela academia."
+            Descricao = "Gerenciar as modalidades e serviÃ§os oferecidos pela academia."
         });
     }
 
@@ -836,26 +836,82 @@ public class AdminController : Controller
         return View("EmBreve", new EmBreveViewModel
         {
             Recurso = "Planos de assinatura",
-            Descricao = "Gerenciar planos, preços e benefícios oferecidos aos alunos."
+            Descricao = "Gerenciar planos, preÃ§os e benefÃ­cios oferecidos aos alunos."
         });
     }
 
     [HttpGet("conteudo", Name = "AdminConteudo")]
     public IActionResult Conteudo()
     {
-        PrepararViewData("Conteúdo do site");
+        PrepararViewData("ConteÃºdo do site");
         return View("EmBreve", new EmBreveViewModel
         {
-            Recurso = "Conteúdo do site",
-            Descricao = "Editar textos, imagens e conteúdos exibidos nas páginas públicas."
+            Recurso = "ConteÃºdo do site",
+            Descricao = "Editar textos, imagens e conteÃºdos exibidos nas pÃ¡ginas pÃºblicas."
         });
     }
 
     [HttpGet("configuracoes", Name = "AdminConfiguracoes")]
     public IActionResult Configuracoes()
     {
-        PrepararViewData("Configurações do site");
+        PrepararViewData("ConfiguraÃ§Ãµes do site");
         return View(_siteConfig.Obter());
+    }
+
+    // ---------------------------------------------------------------------
+    // PERFIL DA PRÃ“PRIA CONTA
+    // ---------------------------------------------------------------------
+
+    [HttpGet("perfil")]
+    public async Task<IActionResult> Perfil()
+    {
+        ViewData["Title"] = "Meu Perfil";
+        PrepararViewData("Meu Perfil");
+
+        var admin = await _db.Administradores.AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == UsuarioId);
+
+        if (admin == null)
+        {
+            TempData["Aviso"] = "Conta nÃ£o encontrada no banco de dados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        var perfil = new PerfilContaViewModel
+        {
+            NomeCompleto = admin.NomeCompleto,
+            Email = admin.Email,
+            Telefone = admin.Telefone,
+            DataNascimento = admin.DataNascimento == default ? null : admin.DataNascimento,
+            MembroDesde = admin.CriadoEm.ToString("MMMM 'de' yyyy"),
+            ContaAtiva = admin.Status == StatusConta.Ativa,
+            Papel = Permissoes.Administrador
+        };
+
+        return View(perfil);
+    }
+
+    [HttpPost("perfil")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> AtualizarPerfil(string nomeCompleto, string telefone)
+    {
+        var admin = await _db.Administradores.FirstOrDefaultAsync(a => a.Id == UsuarioId);
+        if (admin == null)
+        {
+            TempData["Aviso"] = "Conta nÃ£o encontrada no banco de dados.";
+            return RedirectToAction(nameof(Index));
+        }
+
+        if (!string.IsNullOrWhiteSpace(nomeCompleto))
+            admin.NomeCompleto = nomeCompleto.Trim();
+
+        if (!string.IsNullOrWhiteSpace(telefone))
+            admin.Telefone = telefone.Trim();
+
+        await _db.SaveChangesAsync();
+
+        TempData["Sucesso"] = "Perfil atualizado com sucesso!";
+        return RedirectToAction(nameof(Perfil));
     }
 
     // ---------------------------------------------------------------------

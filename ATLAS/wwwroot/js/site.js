@@ -11,11 +11,13 @@
     const voltarTopo = document.getElementById("voltarTopo");
 
     // Navbar com fundo ao rolar
+    // navbar só existe no layout público (#navbar). Nos layouts de dashboard e
+    // autenticação ele é null — sem este guard, onScroll() lançava TypeError na
+    // carga da página e derrubava todo o restante do arquivo (menu lateral,
+    // sino, link ativo etc. nunca eram registrados).
     function onScroll() {
-        if (window.scrollY > 24) {
-            navbar.classList.add("scrolled");
-        } else {
-            navbar.classList.remove("scrolled");
+        if (navbar) {
+            navbar.classList.toggle("scrolled", window.scrollY > 24);
         }
         atualizarScrollUI();
     }
@@ -95,13 +97,27 @@
     function setSidebar(open) {
         if (!sidebar) return;
         sidebar.classList.toggle("open", open);
-        if (sidebarOverlay) sidebarOverlay.hidden = !open;
+        // O overlay fica visível/interativo pela classe .show (CSS), não pelo
+        // atributo hidden — sem ela o backdrop não aparecia e o clique fora
+        // não fechava o menu.
+        sidebarOverlay?.classList.toggle("show", open);
+        // Espelha o comportamento do menu público: riscos viram ✕ e o
+        // aria-expanded acompanha o estado real do menu.
+        sidebarToggle?.classList.toggle("open", open);
+        sidebarToggle?.setAttribute("aria-expanded", String(open));
+        sidebarToggle?.setAttribute("aria-label", open ? "Fechar menu" : "Abrir menu");
+        // Bloqueia o scroll do fundo com o menu aberto (mobile).
+        document.body.style.overflow = open ? "hidden" : "";
     }
 
     if (sidebar && sidebarToggle) {
+        sidebarToggle.setAttribute("aria-expanded", "false");
         sidebarToggle.addEventListener("click", function () { setSidebar(!sidebar.classList.contains("open")); });
         sidebarClose?.addEventListener("click", function () { setSidebar(false); });
         sidebarOverlay?.addEventListener("click", function () { setSidebar(false); });
+        document.addEventListener("keydown", function (e) {
+            if (e.key === "Escape" && sidebar.classList.contains("open")) setSidebar(false);
+        });
         window.addEventListener("resize", function () {
             if (window.innerWidth > 900) setSidebar(false);
         });

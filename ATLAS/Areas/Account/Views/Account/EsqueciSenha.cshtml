@@ -5,7 +5,7 @@
 
 <div class="auth-card">
     <h1>Esqueceu sua <span class="txt-verde">senha</span>?</h1>
-    <p>Informe o e-mail cadastrado. Se encontrarmos a conta, enviaremos um código de 6 dígitos para redefinir a senha.</p>
+    <p>Informe o e-mail cadastrado. Se encontrarmos a conta, enviaremos um link seguro para você redefinir a senha. O link expira em 30 minutos.</p>
 
     @if (!string.IsNullOrEmpty(aviso))
     {
@@ -27,7 +27,7 @@
             <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email" />
         </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Enviar código</button>
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Enviar link de redefinição</button>
     </form>
 </div>
 

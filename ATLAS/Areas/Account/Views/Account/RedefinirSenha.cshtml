@@ -1,43 +1,55 @@
 @{
     Layout = "_LayoutAuth";
-    var aviso = TempData["Aviso"] as string;
+    var tokenValido = ViewBag.TokenValido is bool valido && valido;
 }
 
 <div class="auth-card">
-    <h1>Verifique o <span class="txt-verde">código</span></h1>
-    <p>Informe o código de 6 dígitos que enviamos para o seu e-mail. Ele expira em 15 minutos.</p>
+    <h1>Nova <span class="txt-verde">senha</span></h1>
 
-    @if (!string.IsNullOrEmpty(aviso))
+    @if (!tokenValido)
     {
-        <div class="aviso">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="aviso-icone" width="18" height="18" aria-hidden="true">
+        <div class="aviso aviso-erro" role="alert">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="18" height="18" aria-hidden="true">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" />
             </svg>
-            <span>@aviso</span>
+            <span>Este link de redefinição é inválido ou expirado. Solicite um novo link abaixo.</span>
         </div>
+
+        <p style="font-size:0.92rem; color:var(--muted);">
+            Os links são de uso único e valem por 30 minutos. Se você já usou o link ou ele expirou,
+            basta pedir outro — enviamos um novo a cada solicitação.
+        </p>
+
+        <a asp-action="EsqueciSenha" class="btn btn-primary btn-block btn-lg">Solicitar novo link</a>
     }
+    else
+    {
+        <p>Escolha uma nova senha para a sua conta. Este link é de uso único.</p>
 
-    <form asp-action="RedefinirSenha" method="post">
-        @Html.AntiForgeryToken()
-        @if (!ViewData.ModelState.IsValid)
-        {
-            <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
-        }
+        <form asp-action="RedefinirSenha" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="token" value="@ViewBag.Token" />
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+            }
 
-        <div class="form-field">
-            <label for="email">E-mail</label>
-            <input type="email" id="email" name="email" value="@ViewBag.Email" required readonly autocomplete="email" />
-        </div>
+            <div class="form-field">
+                <label for="novaSenha">Nova senha</label>
+                <input type="password" id="novaSenha" name="novaSenha" placeholder="Mínimo 6 caracteres" required minlength="6" autocomplete="new-password" />
+            </div>
 
-        <div class="form-field">
-            <label for="codigo">Código de 6 dígitos</label>
-            <input type="text" id="codigo" name="codigo" placeholder="000000" maxlength="6" pattern="[0-9]{6}" inputmode="numeric" required autocomplete="one-time-code" />
-        </div>
+            <div class="form-field">
+                <label for="confirmarSenha">Confirmar nova senha</label>
+                <input type="password" id="confirmarSenha" name="confirmarSenha" placeholder="Repita a nova senha" required minlength="6" autocomplete="new-password" />
+            </div>
 
-        <button type="submit" class="btn btn-primary btn-block btn-lg">Verificar código</button>
-    </form>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Alterar senha</button>
+        </form>
+    }
 </div>
 
 <p class="auth-alt">
-    Não recebeu o código? <a asp-action="EsqueciSenha">Solicitar novamente</a>
+    Não recebeu o link? <a asp-action="EsqueciSenha">Solicitar novamente</a>
+    · <a asp-action="Login">Voltar para o login</a>
 </p>

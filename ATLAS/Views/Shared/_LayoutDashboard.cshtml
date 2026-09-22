@@ -12,6 +12,22 @@
     var notificacoes = ViewData["Notificacoes"] as List<AlunoNotificacaoItem> ?? new List<AlunoNotificacaoItem>();
     var naoLidas = notificacoes.Count(n => !n.Lida);
     var tokensCsrf = Antiforgery.GetAndStoreTokens(Context);
+
+    // Perfil de cada conta: a rota é escolhida pelo papel da sessão (claim),
+    // então ADM, Personal e Aluno caem na própria página de perfil.
+    string perfilUrl;
+    if (User.IsInRole(Permissoes.Administrador))
+    {
+        perfilUrl = Url.Action("Perfil", "Admin", new { area = "Admin" }) ?? "/admin/perfil";
+    }
+    else if (User.IsInRole(Permissoes.Personal))
+    {
+        perfilUrl = Url.Action("Perfil", "Personal", new { area = "Personal" }) ?? "/personal/perfil";
+    }
+    else
+    {
+        perfilUrl = Url.Action("Perfil", "Aluno", new { area = "Aluno" }) ?? "/aluno/perfil";
+    }
 }
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -76,7 +92,7 @@
 
     <div class="dash-main">
         <header class="dash-topbar">
-            <button type="button" class="hamburger dash-toggle" id="sidebarToggle" aria-label="Abrir menu" aria-controls="sidebar">
+            <button type="button" class="hamburger dash-toggle" id="sidebarToggle" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="false">
                 <span></span><span></span><span></span>
             </button>
             <h1 class="dash-titulo">@titulo</h1>
@@ -117,7 +133,7 @@
                         </div>
                     </div>
                 }
-                <span class="avatar avatar-sm" aria-hidden="true">@iniciais</span>
+                <a href="@perfilUrl" class="avatar avatar-sm perfil-link" aria-label="Meu perfil" title="Meu perfil">@iniciais</a>
             </div>
         </header>
 

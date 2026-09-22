@@ -36,11 +36,11 @@ public class AccountController : Controller
         _logger = logger;
     }
 
-    // Recuperação de senha: limites para não abusar do canal de e-mail nem do código.
+    // Recuperação de senha por link: limites para não abusar do canal de e-mail.
     private static readonly TimeSpan IntervaloEntreSolicitacoes = TimeSpan.FromSeconds(60);
     private static readonly TimeSpan JanelaSolicitacoes = TimeSpan.FromMinutes(10);
     private const int MaxSolicitacoesNaJanela = 5;
-    private const int MaxTentativasCodigo = 5;
+    private static readonly TimeSpan ValidadeTokenRecuperacao = TimeSpan.FromMinutes(30);
 
     [HttpGet("/login")]
     public IActionResult Login(string? returnUrl)
@@ -284,15 +284,15 @@ public class AccountController : Controller
 
         if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email))
         {
-            TempData["Aviso"] = "Se o e-mail estiver cadastrado, enviaremos o código.";
-            return RedirectToAction(nameof(RedefinirSenha), new { email });
+            TempData["Aviso"] = "Se o e-mail estiver cadastrado, enviaremos o link de redefinição.";
+            return RedirectToAction(nameof(EsqueciSenha));
         }
 
-        // Limita a frequência de solicitações por e-mail e IP para não esgotar a cota de SMTP.
+        // Limita a frequência de solicitações por e-mail e IP para não esgotar a cota de envio.
         var chaveCliente = $"recuperacao:req:{email}|{HttpContext.Connection.RemoteIpAddress ?? null}";
         if (_cache.TryGetValue(chaveCliente, out DateTime _))
         {
-            TempData["Aviso"] = "Aguarde um instante antes de solicitar outro código.";
+            TempData["Aviso"] = "Aguarde um instante antes de solicitar outro link.";
             return RedirectToAction(nameof(EsqueciSenha));
         }
 
@@ -305,7 +305,7 @@ public class AccountController : Controller
             historico.RemoveAll(d => d < corte);
             if (historico.Count >= MaxSolicitacoesNaJanela)
             {
-                TempData["Aviso"] = "Muitas solicitações de código. Tente novamente mais tarde.";
+                TempData["Aviso"] = "Muitas solicitações. Tente novamente mais tarde.";
                 return RedirectToAction(nameof(EsqueciSenha));
             }
         }
@@ -324,21 +324,24 @@ public class AccountController : Controller
 
         if (usuario != null)
         {
-            // Novo código a cada solicitação — invalida código e tentativas anteriores.
-            var codigo = GerarCodigoRecuperacao();
-            usuario.PasswordResetToken = GerarHashCodigo(codigo);
-            usuario.PasswordResetTokenExpires = DateTime.UtcNow.AddMinutes(15);
-            _cache.Remove($"recuperacao:att:{email}");
+            // Novo link a cada solicitação — invalida o token anterior. No banco
+            // fica apenas o hash SHA-256; o token em texto puro só viaja no
+            // e-mail, nunca é persistido nem logado.
+            var token = GerarTokenRecuperacao();
+            usuario.PasswordResetToken = GerarHashToken(token);
+            usuario.PasswordResetTokenExpires = DateTime.UtcNow.Add(ValidadeTokenRecuperacao);
+
+            var link = $"{Request.Scheme}://{Request.Host}{Url.Content("~/redefinir-senha")}?token={Uri.EscapeDataString(token)}";
 
             bool enviado;
             try
             {
                 await _db.SaveChangesAsync();
-                enviado = await _email.EnviarCodigoRecuperacaoAsync(email, codigo, usuario.NomeCompleto);
+                enviado = await _email.EnviarLinkRecuperacaoAsync(email, link, usuario.NomeCompleto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Falha ao salvar ou enviar código de recuperação para {Email}", email);
+                _logger.LogError(ex, "Falha ao salvar ou enviar link de recuperação para {Email}", email);
                 enviado = false;
             }
 
@@ -357,12 +360,18 @@ public class AccountController : Controller
             _cache.Set(chaveJanela, historico, JanelaSolicitacoes);
         }
 
-        TempData["Aviso"] = "Se o e-mail estiver cadastrado, enviaremos o código de 6 dígitos.";
-        return RedirectToAction(nameof(RedefinirSenha), new { email });
+        // Mensagem única e genérica — não revela se a conta existe.
+        TempData["Aviso"] = "Se o e-mail estiver cadastrado, você receberá um link para redefinir a senha.";
+        return RedirectToAction(nameof(EsqueciSenha));
     }
 
+    /// <summary>
+    /// Etapa final do fluxo por link: o token opaco chega na query string do
+    /// e-mail. A conta é localizada somente pelo hash do token — não existe
+    /// campo de e-mail no formulário, então é impossível mirar outra conta.
+    /// </summary>
     [HttpGet("/redefinir-senha")]
-    public IActionResult RedefinirSenha(string? email)
+    public async Task<IActionResult> RedefinirSenha(string? token)
     {
         if (User.Identity?.IsAuthenticated == true)
         {
@@ -370,158 +379,64 @@ public class AccountController : Controller
         }
 
         ViewData["Title"] = "Redefinir senha";
-        ViewBag.Email = email ?? string.Empty;
+        ViewBag.Token = token ?? string.Empty;
+        ViewBag.TokenValido = await TokenRecuperacaoValidoAsync(token);
+
         return View();
     }
 
     [HttpPost("/redefinir-senha")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> RedefinirSenha(string email, string codigo)
+    public async Task<IActionResult> RedefinirSenha(string token, string novaSenha, string confirmarSenha)
     {
         ViewData["Title"] = "Redefinir senha";
-        ViewBag.Email = email;
-
-        email = (email ?? string.Empty).Trim().ToLowerInvariant();
-        codigo = (codigo ?? string.Empty).Trim();
-
-        if (!new System.ComponentModel.DataAnnotations.EmailAddressAttribute().IsValid(email))
-        {
-            ModelState.AddModelError(string.Empty, "Informe o e-mail usado na solicitação.");
-            return View();
-        }
-
-        if (codigo.Length != 6 || !codigo.All(char.IsDigit))
-        {
-            ModelState.AddModelError(string.Empty, "Informe o código de 6 dígitos recebido por e-mail.");
-            return View();
-        }
-
-        Usuario? usuario;
-        try
-        {
-            usuario = await _db.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao consultar {Email} na redefinição de senha.", email);
-            ModelState.AddModelError(string.Empty, "O serviço está temporariamente indisponível. Tente novamente.");
-            return View();
-        }
-
-        if (usuario == null || string.IsNullOrWhiteSpace(usuario.PasswordResetToken))
-        {
-            ModelState.AddModelError(string.Empty, "Solicite um novo código de recuperação.");
-            return View();
-        }
-
-        // Limite de tentativas de validação (contador em memória, ligado à validade do token).
-        var chaveTentativas = $"recuperacao:att:{email}";
-        var tentativas = _cache.GetOrCreate(chaveTentativas, _ => 0);
-        if (tentativas >= MaxTentativasCodigo)
-        {
-            InutilizarToken(usuario);
-            try { await _db.SaveChangesAsync(); } catch (Exception ex) { _logger.LogError(ex, "Não foi possível invalidar código para {Email}", email); }
-            _cache.Remove(chaveTentativas);
-            ModelState.AddModelError(string.Empty, "Muitas tentativas. Solicite um novo código.");
-            return View();
-        }
-
-        if (usuario.PasswordResetTokenExpires == null || usuario.PasswordResetTokenExpires < DateTime.UtcNow)
-        {
-            InutilizarToken(usuario);
-            try { await _db.SaveChangesAsync(); } catch (Exception ex) { _logger.LogError(ex, "Não foi possível invalidar código expirado para {Email}", email); }
-            _cache.Remove(chaveTentativas);
-            ModelState.AddModelError(string.Empty, "Código expirado. Solicite um novo código.");
-            return View();
-        }
-
-        if (CodigoNaoConfere(codigo, usuario.PasswordResetToken))
-        {
-            var tentativaAtual = tentativas + 1;
-            _cache.Set(chaveTentativas, tentativaAtual, TimeSpan.FromMinutes(15));
-            ModelState.AddModelError(string.Empty, tentativaAtual >= MaxTentativasCodigo
-                ? "Código inválido. Muitas tentativas — solicite um novo código."
-                : $"Código inválido. Restam {MaxTentativasCodigo - tentativaAtual} tentativa(s).");
-            return View();
-        }
-
-        // Código correto: autoriza a troca de senha (marcador em cookie TempData protegido).
-        TempData["ResetAutorizado"] = email;
-        return RedirectToAction(nameof(NovaSenha), new { email });
-    }
-
-    [HttpGet("/redefinir-senha/nova-senha")]
-    public IActionResult NovaSenha(string? email)
-    {
-        if (User.Identity?.IsAuthenticated == true)
-        {
-            return RedirecionarPorPapel();
-        }
-
-        if (!ResetAutorizadoPara(email))
-        {
-            return RedirectToAction(nameof(RedefinirSenha));
-        }
-
-        ViewData["Title"] = "Nova senha";
-        ViewBag.Email = email ?? string.Empty;
-        return View();
-    }
-
-    [HttpPost("/redefinir-senha/nova-senha")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> NovaSenha(string email, string novaSenha, string confirmarSenha)
-    {
-        ViewData["Title"] = "Nova senha";
-        ViewBag.Email = email;
-
-        if (!ResetAutorizadoPara(email))
-        {
-            return RedirectToAction(nameof(RedefinirSenha));
-        }
-
-        email = (email ?? string.Empty).Trim().ToLowerInvariant();
-        ViewBag.Email = email;
+        token = (token ?? string.Empty).Trim();
+        ViewBag.Token = token;
 
         if (string.IsNullOrWhiteSpace(novaSenha) || novaSenha.Length < 6)
             ModelState.AddModelError(string.Empty, "A nova senha deve ter pelo menos 6 caracteres.");
         if (novaSenha != confirmarSenha)
             ModelState.AddModelError(string.Empty, "As senhas não conferem.");
 
-        if (!ModelState.IsValid) return View();
+        if (!ModelState.IsValid)
+        {
+            ViewBag.TokenValido = await TokenRecuperacaoValidoAsync(token);
+            return View();
+        }
 
         Usuario? usuario;
         try
         {
-            usuario = await _db.Usuarios.FirstOrDefaultAsync(u => u.Email.ToLower() == email);
+            var hash = GerarHashToken(token);
+            usuario = await _db.Usuarios
+                .FirstOrDefaultAsync(u => u.PasswordResetToken == hash);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao consultar {Email} na nova senha.", email);
+            _logger.LogError(ex, "Erro ao validar link de redefinição de senha.");
             ModelState.AddModelError(string.Empty, "O serviço está temporariamente indisponível. Tente novamente.");
+            ViewBag.TokenValido = false;
             return View();
         }
 
-        if (usuario == null || string.IsNullOrWhiteSpace(usuario.PasswordResetToken))
+        if (usuario == null || usuario.PasswordResetTokenExpires == null || usuario.PasswordResetTokenExpires < DateTime.UtcNow)
         {
-            // Entre as duas etapas o código pode ter sido usado/invalidado em outra aba.
-            TempData.Remove("ResetAutorizado");
-            ModelState.AddModelError(string.Empty, "A solicitação não é mais válida. Solicite um novo código.");
-            return View();
-        }
+            // Link inexistente ou expirado: mensagem única, sem dizer qual.
+            if (usuario != null)
+            {
+                InutilizarToken(usuario);
+                try { await _db.SaveChangesAsync(); }
+                catch (Exception ex) { _logger.LogError(ex, "Não foi possível invalidar token expirado do usuário {Id}.", usuario.Id); }
+            }
 
-        if (usuario.PasswordResetTokenExpires == null || usuario.PasswordResetTokenExpires < DateTime.UtcNow)
-        {
-            InutilizarToken(usuario);
-            try { await _db.SaveChangesAsync(); } catch (Exception ex) { _logger.LogError(ex, "Não foi possível invalidar código expirado para {Email}", email); }
-            TempData.Remove("ResetAutorizado");
-            ModelState.AddModelError(string.Empty, "Código expirado. Solicite um novo código.");
+            _logger.LogInformation("Tentativa de redefinição com link inválido ou expirado.");
+            ViewBag.Token = string.Empty;
+            ViewBag.TokenValido = false;
             return View();
         }
 
         usuario.SenhaHash = SegurancaSenha.GerarHash(novaSenha);
-        InutilizarToken(usuario);
-        _cache.Remove($"recuperacao:att:{email}");
+        InutilizarToken(usuario); // uso único: o link deixa de valer na hora.
 
         try
         {
@@ -529,22 +444,36 @@ public class AccountController : Controller
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao salvar nova senha de {Email}", email);
+            _logger.LogError(ex, "Erro ao salvar nova senha do usuário {Id}.", usuario.Id);
             ModelState.AddModelError(string.Empty, "Não foi possível salvar a nova senha. Tente novamente.");
+            ViewBag.TokenValido = true;
             return View();
         }
 
-        _logger.LogInformation("Senha redefinida para {Email}.", email);
-        TempData.Remove("ResetAutorizado");
+        _logger.LogInformation("Senha redefinida por link para {Email}.", usuario.Email);
         TempData["Sucesso"] = "Senha alterada com sucesso! Faça login com a nova senha.";
         return RedirectToAction(nameof(Login));
     }
 
-    private bool ResetAutorizadoPara(string? email)
+    /// <summary>Confere se existe token válido (presente e não expirado) para exibir o formulário.</summary>
+    private async Task<bool> TokenRecuperacaoValidoAsync(string? token)
     {
-        var autorizado = TempData.Peek("ResetAutorizado") as string;
-        return !string.IsNullOrEmpty(autorizado) &&
-               string.Equals(autorizado, (email ?? string.Empty).Trim().ToLowerInvariant(), StringComparison.Ordinal);
+        token = (token ?? string.Empty).Trim();
+        if (string.IsNullOrEmpty(token)) return false;
+
+        try
+        {
+            var hash = GerarHashToken(token);
+            return await _db.Usuarios.AnyAsync(u =>
+                u.PasswordResetToken == hash &&
+                u.PasswordResetTokenExpires != null &&
+                u.PasswordResetTokenExpires > DateTime.UtcNow);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao consultar link de recuperação.");
+            return false;
+        }
     }
 
     private async Task EntrarAsync(Usuario usuario)
@@ -591,31 +520,22 @@ public class AccountController : Controller
     private Task<bool> EmailEmUsoAsync(string email) =>
         _db.Usuarios.AnyAsync(u => u.Email.ToLower() == email.ToLower());
 
-    /// <summary>Código de 6 dígitos gerado com criptografia (não previsível).</summary>
-    private static string GerarCodigoRecuperacao()
+    /// <summary>Token opaco de 256 bits (CSPRG) para o link de recuperação — Base64Url, seguro em query string.</summary>
+    private static string GerarTokenRecuperacao()
     {
-        Span<byte> bytes = stackalloc byte[4];
+        Span<byte> bytes = stackalloc byte[32];
         System.Security.Cryptography.RandomNumberGenerator.Fill(bytes);
-        var numero = BitConverter.ToUInt32(bytes) % 1_000_000;
-        return numero.ToString("D6");
+        return Convert.ToBase64String(bytes)
+            .Replace('+', '-')
+            .Replace('/', '_')
+            .TrimEnd('=');
     }
 
-    private static string GerarHashCodigo(string codigo)
+    /// <summary>Hash SHA-256 do token — é isto que fica armazenado no banco.</summary>
+    private static string GerarHashToken(string token)
     {
         using var sha = System.Security.Cryptography.SHA256.Create();
-        return Convert.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(codigo))).ToLowerInvariant();
-    }
-
-    /// <summary>Comparação em tempo constante para não vazar informações do hash.</summary>
-    private static bool CodigoNaoConfere(string codigo, string hashArmazenado)
-    {
-        var informado = System.Text.Encoding.UTF8.GetBytes(GerarHashCodigo(codigo));
-        var armazenado = System.Text.Encoding.UTF8.GetBytes(hashArmazenado);
-        if (informado.Length != armazenado.Length)
-        {
-            return true;
-        }
-        return !System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(informado, armazenado);
+        return Convert.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(token))).ToLowerInvariant();
     }
 
     private static void InutilizarToken(Usuario usuario)
