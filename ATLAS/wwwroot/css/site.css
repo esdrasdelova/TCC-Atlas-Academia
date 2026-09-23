@@ -1339,6 +1339,22 @@ svg, img { flex-shrink: 0; }
 
 .form-nota { color: var(--muted-2); font-size: 0.76rem; }
 
+/* "Esqueci minha senha" no login: destaque em verde da Atlas, logo abaixo do
+   campo de senha — visível sem virar um botão. */
+.esqueci-senha { margin: -0.3rem 0 1rem; text-align: right; }
+.esqueci-senha a {
+    color: var(--green);
+    font-size: 0.9rem;          /* maior que as notas (0.76rem) */
+    font-weight: 600;
+    text-decoration: none;
+    transition: var(--transition);
+}
+.esqueci-senha a:hover,
+.esqueci-senha a:focus-visible {
+    text-decoration: underline;
+    filter: brightness(1.15);
+}
+
 .btn-block { width: 100%; justify-content: center; margin-top: 0.4rem; }
 
 .aviso {

@@ -42,9 +42,13 @@
             <input type="password" id="senha" name="senha" placeholder="Sua senha" required autocomplete="current-password" />
         </div>
 
+        @* Destaque: logo abaixo do campo de senha, em verde e maior que as notas. *@
+        <p class="esqueci-senha">
+            <a asp-action="EsqueciSenha">Esqueci minha senha</a>
+        </p>
+
         <button type="submit" class="btn btn-primary btn-block btn-lg">Entrar</button>
         <p class="form-nota" style="margin-top:1rem;">Aluno, personal ou administrador — o sistema identificará seu perfil no acesso.</p>
-        <p class="form-nota" style="margin-top:0.5rem;"><a asp-action="EsqueciSenha">Esqueci minha senha</a></p>
     </form>
 
     <details class="contas-demo">

@@ -24,26 +24,44 @@ public class EmailService : IEmailService
         _logger = logger;
     }
 
-    public Task<bool> EnviarAsync(EmailMensagem mensagem)
+    /// <summary>
+    /// Há credencial pronta? Sem ela nenhum envio acontece — o motivo é
+    /// "não configurado" (falta de <c>Email__Senha</c> ou <c>Email__Resend__ApiKey</c>),
+    /// e não uma falha de rede do provedor.
+    /// </summary>
+    public bool Configurado =>
+        !string.IsNullOrWhiteSpace(_config.Remetente) &&
+        (!string.IsNullOrWhiteSpace(_config.Resend?.ApiKey) || !string.IsNullOrWhiteSpace(_config.Senha));
+
+    public async Task<bool> EnviarAsync(EmailMensagem mensagem) =>
+        await EnviarComStatusAsync(mensagem) == StatusEnvio.Enviado;
+
+    private async Task<StatusEnvio> EnviarComStatusAsync(EmailMensagem mensagem)
     {
         if (string.IsNullOrWhiteSpace(_config.Remetente) || mensagem.Para.Count == 0)
         {
-            _logger.LogWarning("E-mail não enviado: remetente ou destinatário ausente.");
-            return Task.FromResult(false);
+            _logger.LogError("E-mail não enviado: remetente ou destinatário ausente.");
+            return StatusEnvio.NaoConfigurado;
         }
 
         // Resend (API) tem prioridade quando configurado — é o caminho permanente.
         return !string.IsNullOrWhiteSpace(_config.Resend?.ApiKey)
-            ? EnviarViaResendAsync(mensagem)
-            : EnviarViaSmtpAsync(mensagem);
+            ? await EnviarViaResendAsync(mensagem)
+            : await EnviarViaSmtpAsync(mensagem);
     }
 
-    private async Task<bool> EnviarViaSmtpAsync(EmailMensagem mensagem)
+    private async Task<StatusEnvio> EnviarViaSmtpAsync(EmailMensagem mensagem)
     {
         if (string.IsNullOrWhiteSpace(_config.Senha))
         {
-            _logger.LogWarning("E-mail não enviado: senha SMTP não configurada (Email__Senha).");
-            return false;
+            // Causa raiz: a senha SMTP nunca foi fornecida (appsettings vazio e
+            // nenhuma variável de ambiente definida). Loga o que falta configurar.
+            _logger.LogError(
+                "Envio de e-mail BLOQUEADO: credencial SMTP ausente. Defina a variável de ambiente " +
+                "Email__Senha (senha de app do Gmail de {Remetente}) — ou Email__Resend__ApiKey — e reinicie. " +
+                "Enquanto isso nenhum e-mail sai, inclusive o de recuperação de senha.",
+                string.IsNullOrWhiteSpace(_config.Remetente) ? "(remetente não configurado)" : _config.Remetente);
+            return StatusEnvio.NaoConfigurado;
         }
 
         try
@@ -74,12 +92,13 @@ public class EmailService : IEmailService
 #pragma warning restore SYSLIB0014
 
             _logger.LogInformation("E-mail enviado para {Para} (assunto: {Assunto})", string.Join(", ", mensagem.Para), mensagem.Assunto);
-            return true;
+            return StatusEnvio.Enviado;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Falha ao enviar e-mail para {Para}", mensagem.Para);
-            return false;
+            _logger.LogError(ex, "Falha ao enviar e-mail para {Para} via {Host}:{Porta}",
+                mensagem.Para, _config.Smtp.Host, _config.Smtp.Porta);
+            return StatusEnvio.Falhou;
         }
     }
 
@@ -87,7 +106,7 @@ public class EmailService : IEmailService
     /// Envio via API REST do Resend (https://api.resend.com/emails). HTTPS puro,
     /// sem senha rotativa — a chave re_ é permanente e funciona de qualquer máquina.
     /// </summary>
-    private async Task<bool> EnviarViaResendAsync(EmailMensagem mensagem)
+    private async Task<StatusEnvio> EnviarViaResendAsync(EmailMensagem mensagem)
     {
         try
         {
@@ -110,20 +129,23 @@ public class EmailService : IEmailService
             {
                 _logger.LogError("Resend falhou ({Status}): {Corpo} para {Para}",
                     (int)resposta.StatusCode, corpoResposta, string.Join(", ", mensagem.Para));
-                return false;
+                return StatusEnvio.Falhou;
             }
 
             _logger.LogInformation("E-mail enviado via Resend para {Para} (assunto: {Assunto})", string.Join(", ", mensagem.Para), mensagem.Assunto);
-            return true;
+            return StatusEnvio.Enviado;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Falha ao enviar via Resend para {Para}", mensagem.Para);
-            return false;
+            return StatusEnvio.Falhou;
         }
     }
 
-    public async Task<bool> EnviarLinkRecuperacaoAsync(string emailDestino, string linkRedefinicao, string nomeUsuario)
+    public async Task<bool> EnviarLinkRecuperacaoAsync(string emailDestino, string linkRedefinicao, string nomeUsuario) =>
+        await EnviarLinkRecuperacaoComStatusAsync(emailDestino, linkRedefinicao, nomeUsuario) == StatusEnvio.Enviado;
+
+    public async Task<StatusEnvio> EnviarLinkRecuperacaoComStatusAsync(string emailDestino, string linkRedefinicao, string nomeUsuario)
     {
         var primeiroNome = (nomeUsuario ?? string.Empty).Split(' ').FirstOrDefault() ?? string.Empty;
         var link = System.Net.WebUtility.HtmlEncode(linkRedefinicao);
@@ -152,6 +174,6 @@ public class EmailService : IEmailService
         };
         mensagem.Para.Add(emailDestino);
 
-        return await EnviarAsync(mensagem);
+        return await EnviarComStatusAsync(mensagem);
     }
 }

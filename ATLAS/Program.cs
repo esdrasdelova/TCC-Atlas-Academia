@@ -3,6 +3,7 @@ using ATLAS.Middleware;
 using ATLAS.Models;
 using ATLAS.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -86,6 +87,46 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     });
 
 var app = builder.Build();
+
+// URLs corretas (ex.: link de recuperação de senha) mesmo atrás de proxy:
+// honra X-Forwarded-For/Proto do proxy local (loopback), que é o padrão —
+// suficiente para dev e para proxy na mesma máquina (nginx/IIS), sem permitir
+// spoofing de IP (a proteção de brute force por IP continua valendo quando a
+// aplicação é exposta diretamente). Em nuvem (proxy que NÃO é loopback),
+// defina ConfiarProxy=true — somente com a app atrás de proxy de confiança.
+var encaminhados = new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+};
+if (app.Configuration.GetValue<bool>("ConfiarProxy"))
+{
+    encaminhados.KnownIPNetworks.Clear();
+    encaminhados.KnownProxies.Clear();
+}
+app.UseForwardedHeaders(encaminhados);
+
+// Diagnóstico de envio de e-mail logo na subida: se faltar credencial, o erro
+// aparece aqui (com o nome exato da variável) em vez de só quando alguém pedir
+// a recuperação de senha.
+{
+    var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("EnvioEmail");
+    if (!app.Services.GetRequiredService<IEmailService>().Configurado)
+    {
+        logger.LogError(
+            "ENVIO DE E-MAIL DESABILITADO: nenhuma credencial encontrada. Defina a variável de ambiente " +
+            "Email__Senha (senha de app do Gmail para {Remetente}) ou Email__Resend__ApiKey (chave re_ do Resend) " +
+            "e reinicie a aplicação. Sem isso, o link de recuperação de senha não será entregue.",
+            string.IsNullOrWhiteSpace(builder.Configuration["Email:Remetente"]) ? "(remetente)" : builder.Configuration["Email:Remetente"]);
+    }
+    else
+    {
+        logger.LogInformation(
+            "Envio de e-mail habilitado via {Caminho}.",
+            !string.IsNullOrWhiteSpace(builder.Configuration["Email:Resend:ApiKey"])
+                ? "Resend (Email__Resend__ApiKey)"
+                : $"SMTP ({builder.Configuration["Email:Smtp:Host"]}:{builder.Configuration["Email:Smtp:Porta"]})");
+    }
+}
 
 // Aplica o schema do banco (cria tabelas se necessário) e popula/separa os dados iniciais.
 using (var scope = app.Services.CreateScope())

@@ -200,6 +200,13 @@ public class AccountController : Controller
             ModelState.AddModelError(string.Empty, "A senha deve ter pelo menos 6 caracteres.");
         }
 
+        // Telefone: somente números. A checagem acontece aqui no servidor, antes de
+        // salvar — não depende do JavaScript do navegador (que também bloqueia letras).
+        if (!ValidarTelefone(telefone, out var telefoneErro))
+        {
+            ModelState.AddModelError(string.Empty, telefoneErro!);
+        }
+
         if (dataNascimento == default || dataNascimento > DateTime.UtcNow.AddYears(-10) || dataNascimento < new DateTime(1920, 1, 1))
         {
             ModelState.AddModelError(string.Empty, "Informe uma data de nascimento válida (mínimo 10 anos).");
@@ -333,19 +340,40 @@ public class AccountController : Controller
 
             var link = $"{Request.Scheme}://{Request.Host}{Url.Content("~/redefinir-senha")}?token={Uri.EscapeDataString(token)}";
 
-            bool enviado;
+            // 1) Grava o hash do token — o texto puro só viaja no link do e-mail.
             try
             {
                 await _db.SaveChangesAsync();
-                enviado = await _email.EnviarLinkRecuperacaoAsync(email, link, usuario.NomeCompleto);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Falha ao salvar ou enviar link de recuperação para {Email}", email);
-                enviado = false;
+                _logger.LogError(ex, "Falha ao salvar token de recuperação para {Email}", email);
+                TempData["Aviso"] = "Não foi possível processar a solicitação agora. Tente novamente em alguns instantes.";
+                return RedirectToAction(nameof(EsqueciSenha));
             }
 
-            if (!enviado)
+            // 2) Envia pelo provedor configurado. Sucesso só é sucesso se o provedor aceitar.
+            StatusEnvio status;
+            try
+            {
+                status = await _email.EnviarLinkRecuperacaoComStatusAsync(email, link, usuario.NomeCompleto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Falha inesperada ao enviar link de recuperação para {Email}", email);
+                status = StatusEnvio.Falhou;
+            }
+
+            // 3) Cada causa vira uma mensagem honesta — nunca fingimos que o e-mail saiu.
+            if (status == StatusEnvio.NaoConfigurado)
+            {
+                // Causa raiz já é logada pelo EmailService com o nome exato da
+                // variável que falta (Email__Senha / Email__Resend__ApiKey).
+                TempData["Aviso"] = "O envio de e-mail do site ainda não está configurado no servidor, então o link não pôde ser enviado. Contate a administração para concluir a configuração.";
+                return RedirectToAction(nameof(EsqueciSenha));
+            }
+
+            if (status != StatusEnvio.Enviado)
             {
                 TempData["Aviso"] = "Não foi possível enviar o e-mail agora. Tente novamente em alguns instantes.";
                 return RedirectToAction(nameof(EsqueciSenha));
@@ -542,6 +570,45 @@ public class AccountController : Controller
     {
         usuario.PasswordResetToken = null;
         usuario.PasswordResetTokenExpires = null;
+    }
+
+    /// <summary>
+    /// Valida o telefone do cadastro: precisa conter de 8 a 15 números.
+    /// Caracteres de máscara (parênteses, espaço, hífen, + e ponto) são apenas
+    /// formatação e são ignorados na contagem; letras ou qualquer outro símbolo
+    /// reprovam o valor — mesmo que a requisição venha de fora do navegador.
+    /// </summary>
+    private static bool ValidarTelefone(string telefone, out string? erro)
+    {
+        erro = null;
+
+        if (string.IsNullOrWhiteSpace(telefone))
+        {
+            erro = "Informe seu telefone.";
+            return false;
+        }
+
+        var digitos = 0;
+        foreach (var c in telefone)
+        {
+            if (char.IsAsciiDigit(c))
+            {
+                digitos++;
+            }
+            else if (c is not ('(' or ')' or '-' or ' ' or '+' or '.'))
+            {
+                erro = "O telefone deve conter apenas números — letras e outros caracteres não são permitidos.";
+                return false;
+            }
+        }
+
+        if (digitos is < 8 or > 15)
+        {
+            erro = "Informe um telefone válido com DDD (de 8 a 15 números).";
+            return false;
+        }
+
+        return true;
     }
 
     private static bool EhViolacaoDeChaveUnica(DbUpdateException ex)
