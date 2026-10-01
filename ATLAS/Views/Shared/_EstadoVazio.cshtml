@@ -1,0 +1,10 @@
+@model EstadoVazioViewModel
+<div class="vazio-estado">
+    <span class="vazio-icone"><partial name="_Icone" model="@Model.Icone" /></span>
+    <strong>@Model.Titulo</strong>
+    <small>@Model.Descricao</small>
+    @if (!string.IsNullOrWhiteSpace(Model.RotuloCta) && !string.IsNullOrWhiteSpace(Model.UrlCta))
+    {
+        <a href="@Model.UrlCta" class="btn btn-primary btn-sm" style="margin-top:1.1rem;">@Model.RotuloCta</a>
+    }
+</div>

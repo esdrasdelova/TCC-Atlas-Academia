@@ -1,0 +1,34 @@
+@model List<ModalidadeItem>
+
+<div class="saudacao">
+    <h2>Aulas <em>coletivas</em></h2>
+    <p>As modalidades disponíveis na Atlas — solicite seu horário e a recepção confirma sua turma.</p>
+</div>
+
+@if (Model.Count > 0)
+{
+    <div class="painel-grid">
+        @foreach (var m in Model)
+        {
+            <div class="card">
+                <div class="card-topo">
+                    <span class="card-label">@m.Titulo</span>
+                    <span class="card-icone card-icone--round"><partial name="_Icone" model="@m.Icone" /></span>
+                </div>
+                <p>@m.Descricao</p>
+                <div class="card-acoes">
+                    <a asp-area="" asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-sm">Agendar</a>
+                </div>
+            </div>
+        }
+    </div>
+
+    <p class="barra-nota" style="margin-top:1rem;">
+        Turmas com vagas limitadas — os horários são confirmados pela recepção após o seu pedido de agendamento.
+    </p>
+}
+else
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "users", Titulo = "Nenhuma modalidade cadastrada", Descricao = "A administração ainda não publicou as modalidades com turmas coletivas. Volte em breve.", RotuloCta = "Ir para o início", UrlCta = "/aluno" })' />
+}

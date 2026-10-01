@@ -1,0 +1,66 @@
+@model List<Exercicio>
+
+<div class="saudacao">
+    <h2>Biblioteca de <em>exercícios</em></h2>
+    <p>Catálogo da academia organizado por grupo muscular — consulte como preparar o corpo para cada treino.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "space", Titulo = "Nenhum exercício cadastrado", Descricao = "A administração ainda não publicou o catálogo de exercícios. Volte em breve.", RotuloCta = "Ir para o início", UrlCta = "/aluno" })' />
+}
+else
+{
+    <div class="busca-form" role="search" style="margin-bottom:0.5rem;">
+        <input type="search" id="buscaExercicio" placeholder="Buscar por nome ou grupo muscular…" aria-label="Buscar exercício" />
+        <span class="barra-nota" style="margin:0;">@Model.Count exercício(s) disponíveis</span>
+    </div>
+
+    @foreach (var grupo in Model.GroupBy(e => string.IsNullOrWhiteSpace(e.GrupoMuscular) ? "Outros" : e.GrupoMuscular).OrderBy(g => g.Key))
+    {
+        <div class="painel-secao">
+            <h2>@grupo.Key</h2>
+            <span>@grupo.Count() exercício(s)</span>
+        </div>
+
+        <div class="lista-painel">
+            @foreach (var exercicio in grupo)
+            {
+                <details class="lista-item exercicio-catalogo" data-termo="@exercicio.Nome @exercicio.GrupoMuscular" style="display:block; color:inherit;">
+                    <summary>
+                        <span class="card-icone card-icone--round" aria-hidden="true"><partial name="_Icone" model='@("dumbbell")' /></span>
+                        <div class="lista-info" style="flex:1;">
+                            <strong>@exercicio.Nome</strong>
+                            <small>@exercicio.GrupoMuscular</small>
+                        </div>
+                    </summary>
+                    @if (!string.IsNullOrEmpty(exercicio.Descricao))
+                    {
+                        <p>@exercicio.Descricao</p>
+                    }
+                    @if (!string.IsNullOrEmpty(exercicio.Instrucoes))
+                    {
+                        <p><em>Execução:</em> @exercicio.Instrucoes</p>
+                    }
+                </details>
+            }
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        (function () {
+            var campo = document.getElementById("buscaExercicio");
+            var itens = Array.from(document.querySelectorAll(".exercicio-catalogo"));
+            if (!campo || !itens.length) return;
+            campo.addEventListener("input", function () {
+                var termo = campo.value.trim().toLowerCase();
+                itens.forEach(function (item) {
+                    item.hidden = termo && item.dataset.termo.toLowerCase().indexOf(termo) === -1;
+                });
+            });
+        })();
+    </script>
+}

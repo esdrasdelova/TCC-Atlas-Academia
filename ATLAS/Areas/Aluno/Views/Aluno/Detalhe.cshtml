@@ -1,0 +1,43 @@
+@model Treino
+@{
+    var personal = Model.Personal;
+}
+
+<div class="saudacao">
+    <h2>@Model.Nome — <em>@(Model.Objetivo ?? "treino personalizado")</em></h2>
+    <p>
+        Ficha criada pelo seu personal
+        @if (personal != null)
+        {
+            <span><em>@personal.NomeCompleto.Split(' ')[0]</em></span>
+        } · somente leitura.
+    </p>
+</div>
+
+<div class="painel-acoes">
+    <div class="painel-acoes-chips">
+        @if (Model.Ativo)
+        {
+            <span class="chip chip-verde">Em uso</span>
+        }
+        else
+        {
+            <span class="chip chip-cinza">Treino alternativo</span>
+        }
+        <span class="chip chip-cinza">@Model.Itens.Count exercícios</span>
+    </div>
+</div>
+
+<partial name="_TabelaTreino" model="Model.Itens.OrderBy(i => i.Ordem).ToList()" />
+
+@if (!string.IsNullOrEmpty(Model.Observacoes))
+{
+    <div class="aviso" style="margin-top:1.2rem;">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span><strong>Observações do personal:</strong> @Model.Observacoes</span>
+    </div>
+}
+
+<a asp-area="Aluno" asp-controller="Aluno" asp-action="Treinos" class="btn btn-ghost btn-sm" style="margin-top:1.2rem;">
+    Voltar para meus treinos
+</a>
