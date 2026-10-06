@@ -8,6 +8,20 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Segredos locais (NÃO versionados): connection string do banco e chave da IA.
+// Fica num arquivo separado para que o código-fonte possa ir para o GitHub
+// sem expor senha do banco nem chave da API. Em nuvem (Render/Azure), use
+// variáveis de ambiente (ConnectionStrings__Atlas, IA__ApiKey, ...).
+builder.Configuration.AddJsonFile("appsettings.Secrets.json", optional: true, reloadOnChange: true);
+
+// Hospedagens em nuvem injetam a porta via variável PORT (o servidor precisa
+// escutar em 0.0.0.0, não em localhost, para o tráfego externo chegar).
+if (!string.IsNullOrWhiteSpace(builder.Configuration["PORT"])
+    && string.IsNullOrWhiteSpace(builder.Configuration["ASPNETCORE_URLS"]))
+{
+    builder.WebHost.UseUrls($"http://0.0.0.0:{builder.Configuration["PORT"]}");
+}
+
 var connectionString = builder.Configuration.GetConnectionString("Atlas") ?? string.Empty;
 
 // Add services to the container.

@@ -1610,43 +1610,116 @@ svg, img { flex-shrink: 0; }
 .precos-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.4rem;
+    gap: 1.6rem;
     align-items: stretch;
+    padding-top: 1rem;
 }
 
 .preco-card {
     position: relative;
-    background: var(--surface);
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
-    padding: 2.4rem 2rem;
+    padding: 2.6rem 2.2rem 2.2rem;
     display: flex;
     flex-direction: column;
     transition: var(--transition);
 }
-.preco-card:hover { transform: translateY(-5px); border-color: var(--border-strong); }
+/* Linha luminosa no topo: visível sempre, acende no hover */
+.preco-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+    opacity: 0.55;
+    transition: var(--transition);
+}
+/* Brilho radial no canto superior direito — preso dentro do card (sem cortar o selo) */
+.preco-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 88% -8%, rgba(184, 255, 61, 0.09), transparent 44%);
+    pointer-events: none;
+    transition: var(--transition);
+}
+.preco-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--green-line);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px var(--green-line);
+}
+.preco-card:hover::before {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+}
+.preco-card:hover::after {
+    background: radial-gradient(circle at 88% -8%, rgba(184, 255, 61, 0.18), transparent 48%);
+}
+
+/* Chip de ícone no topo de cada card */
+.preco-icone {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: var(--green-soft);
+    border: 1px solid var(--green-line);
+    color: var(--green);
+    margin-bottom: 1.25rem;
+    transition: var(--transition);
+}
+.preco-card:hover .preco-icone {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(184, 255, 61, 0.18);
+}
+.preco-card.destaque .preco-icone {
+    background: var(--green);
+    color: #0c1000;
+    border-color: var(--green);
+    box-shadow: 0 8px 22px rgba(184, 255, 61, 0.35);
+}
 
 .preco-card.destaque {
     border-color: var(--green-line);
-    background: linear-gradient(180deg, rgba(184, 255, 61, 0.06), transparent 40%), var(--surface);
+    background:
+        linear-gradient(180deg, rgba(184, 255, 61, 0.10), rgba(184, 255, 61, 0.02) 45%, transparent),
+        var(--surface);
+    box-shadow: var(--shadow-green);
+    transform: scale(1.04);
+    z-index: 1;
 }
-.preco-card.destaque:hover { border-color: var(--green); box-shadow: var(--shadow-green); }
+.preco-card.destaque::before {
+    opacity: 1;
+    background: linear-gradient(90deg, transparent, var(--green), transparent);
+}
+.preco-card.destaque:hover {
+    transform: scale(1.04) translateY(-8px);
+    border-color: var(--green);
+    box-shadow: 0 18px 48px rgba(184, 255, 61, 0.22);
+}
 
 .preco-selo {
     position: absolute;
-    top: -13px;
+    top: -15px;
     left: 50%;
     transform: translateX(-50%);
     background: var(--green);
     color: #0c1000;
     font-family: var(--font-display);
     font-weight: 600;
-    font-size: 0.72rem;
+    font-size: 0.74rem;
+    line-height: 1.5;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
-    padding: 0.35rem 1rem;
+    letter-spacing: 0.14em;
+    padding: 0.5rem 1.25rem;
     border-radius: 999px;
     white-space: nowrap;
+    box-shadow: 0 6px 18px rgba(184, 255, 61, 0.35);
 }
 
 .preco-nome {
@@ -1657,17 +1730,46 @@ svg, img { flex-shrink: 0; }
     font-size: 1rem;
     color: var(--muted);
 }
+.preco-card.destaque .preco-nome { color: var(--green); }
+
 .preco-valor {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    margin: 1.1rem 0 0.25rem;
+}
+.preco-valor .moeda {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.2rem;
+    color: var(--muted);
+}
+.preco-valor .numero {
     font-family: var(--font-display);
     font-weight: 700;
-    font-size: 2.6rem;
+    font-size: 3.4rem;
     line-height: 1;
-    margin: 0.9rem 0 0.2rem;
+    letter-spacing: 0.01em;
 }
-.preco-periodo { color: var(--muted-2); font-size: 0.84rem; }
-.preco-desc { color: var(--muted); font-size: 0.88rem; margin: 1rem 0 1.4rem; }
+.preco-periodo { color: var(--muted-2); font-size: 0.86rem; }
 
-.preco-lista { display: grid; gap: 0.65rem; margin-bottom: 1.8rem; }
+.preco-info {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: 0.7rem;
+    padding: 0.32rem 0.85rem;
+    border-radius: 999px;
+    background: var(--green-soft);
+    border: 1px solid var(--green-line);
+    color: var(--green);
+    font-size: 0.76rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+.preco-desc { color: var(--muted); font-size: 0.9rem; margin: 1.1rem 0 1.5rem; }
+
+.preco-lista { display: grid; gap: 0.7rem; margin-bottom: 2rem; }
 .preco-lista li {
     position: relative;
     padding-left: 1.55rem;
@@ -1698,6 +1800,30 @@ svg, img { flex-shrink: 0; }
 }
 
 .preco-card .btn { margin-top: auto; justify-content: center; }
+
+/* Faixa de confiança abaixo dos cards */
+.planos-confianca {
+    margin-top: 3.2rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+}
+.conf-item {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.2rem;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    color: var(--muted);
+    transition: var(--transition);
+}
+.conf-item:hover { border-color: var(--green-line); transform: translateY(-3px); }
+.conf-item svg { flex-shrink: 0; color: var(--green); }
+.conf-item strong { color: var(--text); font-weight: 600; }
 
 .tabela-comparativo { width: 100%; border-collapse: collapse; }
 .tabela-comparativo th, .tabela-comparativo td {
@@ -1826,12 +1952,16 @@ svg, img { flex-shrink: 0; }
     .grid-2, .contato-grid { grid-template-columns: 1fr; gap: 2.5rem; }
     .grid-3 { grid-template-columns: repeat(2, 1fr); }
     .precos-grid { grid-template-columns: 1fr; max-width: 480px; margin-inline: auto; }
+    .preco-card.destaque { transform: none; }
+    .preco-card.destaque:hover { transform: translateY(-8px); }
+    .planos-confianca { grid-template-columns: repeat(2, 1fr); }
 }
 
 @media (max-width: 620px) {
     .grid-3 { grid-template-columns: 1fr; }
     .page-hero { padding-top: calc(var(--navbar-h) + 3rem); }
     .pagina { padding: 3.5rem 0 4.5rem; }
+    .planos-confianca { grid-template-columns: 1fr; }
 }
 @media (max-width: 1024px) {
     .destaques-grid, .modalidades-grid, .horarios-grid { grid-template-columns: repeat(2, 1fr); }

@@ -6,6 +6,14 @@
 # dotenv files
 .env
 
+# Segredos do projeto Atlas: connection string do banco e chave da IA.
+# Este arquivo NAO pode ser versionado (contem senha do Supabase e chave da Groq).
+appsettings.Secrets.json
+**/appsettings.Secrets.json
+
+# QR Code gerado para acesso pelo celular
+qrcode-acesso.png
+
 # User-specific files
 *.rsuser
 *.suo

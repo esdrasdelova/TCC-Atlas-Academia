@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Npgsql;
 
@@ -6,8 +8,9 @@ class Program
 {
     static async Task Main()
     {
-        // Connection string do user-secrets (extraida para teste)
-        var connStr = "Host=aws-0-sa-east-1.pooler.supabase.com;Port=6543;Database=postgres;Username=postgres.dzqchyvdqeeqvdqeeqetjzfyku;Password=M6a-P37XEYJDD!b;Pooling=true;Minimum Pool Size=1;Maximum Pool Size=2;Timeout=15;Command Timeout=30;Keepalive=30;Ssl Mode=Require;Trust Server Certificate=true";
+        // Connection string lida do appsettings.Secrets.json (fora do Git) ou da
+        // variavel de ambiente ATLAS_CONNECTION. Nunca escrever a senha no codigo.
+        var connStr = ObterConnectionString();
 
         Console.WriteLine("Conectando ao Supabase...");
         try
@@ -59,5 +62,40 @@ class Program
             if (ex.InnerException != null) Console.WriteLine($"  inner: {ex.InnerException.Message}");
             Environment.Exit(1);
         }
+    }
+
+    /// <summary>
+    /// Procura a connection string do Atlas sem nunca fixa-la no codigo:
+    /// 1) variavel de ambiente ATLAS_CONNECTION
+    /// 2) appsettings.Secrets.json (sobe a partir da pasta do executavel ate encontrar)
+    /// </summary>
+    static string ObterConnectionString()
+    {
+        var doAmbiente = Environment.GetEnvironmentVariable("ATLAS_CONNECTION");
+        if (!string.IsNullOrWhiteSpace(doAmbiente))
+        {
+            return doAmbiente;
+        }
+
+        var pasta = new DirectoryInfo(AppContext.BaseDirectory);
+        while (pasta != null)
+        {
+            var arquivo = Path.Combine(pasta.FullName, "appsettings.Secrets.json");
+            if (File.Exists(arquivo))
+            {
+                using var doc = JsonDocument.Parse(File.ReadAllText(arquivo));
+                if (doc.RootElement.TryGetProperty("ConnectionStrings", out var conexoes)
+                    && conexoes.TryGetProperty("Atlas", out var cs))
+                {
+                    return cs.GetString() ?? string.Empty;
+                }
+            }
+
+            pasta = pasta.Parent;
+        }
+
+        Console.WriteLine("ERRO: connection string nao encontrada. Defina ATLAS_CONNECTION ou crie ATLAS/appsettings.Secrets.json.");
+        Environment.Exit(1);
+        return string.Empty;
     }
 }
