@@ -1,0 +1,109 @@
+@model Aluno
+@{
+    var iniciais = string.Concat(Model.NomeCompleto.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+    var treinoAtivo = Model.Treinos.FirstOrDefault(t => t.Ativo && t.Publicado);
+}
+
+<div class="saudacao">
+    <h2>Ficha do aluno · <em>@Model.NomeCompleto</em></h2>
+    <p>Dados completos, treinos e situação da conta.</p>
+</div>
+
+<div style="display:flex; gap:1.2rem; align-items:center; flex-wrap:wrap; margin-bottom:1.8rem;">
+    <span class="avatar" style="width:64px;height:64px;font-size:1.3rem;" aria-hidden="true">@iniciais</span>
+    <div>
+        <strong style="font-family:var(--font-display); font-size:1.25rem;">@Model.NomeCompleto</strong>
+        <p style="margin:0.15rem 0 0; color:var(--muted); font-size:0.9rem;">@Model.Email · @Model.Telefone</p>
+    </div>
+    <div style="margin-left:auto; display:flex; gap:0.7rem; flex-wrap:wrap;">
+        <span class="chip @(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "chip-verde" : "chip-cinza")">
+            @(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Conta ativa" : "Conta inativa")
+        </span>
+        <a asp-area="Admin" asp-controller="Admin" asp-action="AlunoEditar" asp-route-id="@Model.Id" class="btn btn-primary btn-sm">Editar</a>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="AlunoAlternarStatus" asp-route-id="@Model.Id"
+              onsubmit="return confirm('@(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Desativar" : "Ativar") a conta de @Model.NomeCompleto?');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm">@(Model.Status == ATLAS.Models.Enums.StatusConta.Ativa ? "Desativar conta" : "Ativar conta")</button>
+        </form>
+        <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoNovo" asp-route-alunoId="@Model.Id" class="btn btn-ghost btn-sm">Criar treino</a>
+        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="AlunoExcluir" asp-route-id="@Model.Id"
+              onsubmit="return confirm('Excluir o aluno &quot;@Model.NomeCompleto&quot;? Os @Model.Treinos.Count treino(s) dele também serão removidos. Esta ação não pode ser desfeita.');">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+        </form>
+    </div>
+</div>
+
+<div class="painel-grid painel-grid-3">
+    <div class="card">
+        <span class="card-label">Data de nascimento</span>
+        <strong class="card-valor">@(Model.DataNascimento == default ? "—" : Model.DataNascimento.ToString("dd/MM/yyyy"))</strong>
+        <p>Cadastrado em @Model.CriadoEm.ToLocalTime().ToString("dd/MM/yyyy")</p>
+    </div>
+    <div class="card">
+        <span class="card-label">Personal responsável</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@(Model.Personal?.NomeCompleto ?? "Sem personal")</strong>
+        @if (Model.Personal?.RegistroProfissional != null)
+        {
+            <p>CREF @Model.Personal.RegistroProfissional</p>
+        }
+    </div>
+    <div class="card">
+        <span class="card-label">Objetivo</span>
+        <strong class="card-valor" style="font-size:1.05rem;">@(string.IsNullOrEmpty(Model.Objetivo) ? "Não definido" : Model.Objetivo)</strong>
+    </div>
+</div>
+
+<div class="painel-secao" style="margin-top:2rem; margin-bottom:0.9rem;">
+    <h2>Treinos (@Model.Treinos.Count)</h2>
+    @if (treinoAtivo != null)
+    {
+        <span class="chip chip-verde">@treinoAtivo.Nome em uso</span>
+    }
+    else
+    {
+        <span class="chip chip-cinza">Sem treino ativo</span>
+    }
+</div>
+
+@if (Model.Treinos.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h10"/><rect x="3" y="8.5" width="3" height="7" rx="1"/><rect x="18" y="8.5" width="3" height="7" rx="1"/><path d="M6.2 6.5v11M17.8 6.5v11" opacity=".55"/></svg>
+        </span>
+        <strong>Nenhum treino atribuído</strong>
+        <small>O personal responsável (ou o ADM) pode criar a primeira ficha.</small>
+    </div>
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var treino in Model.Treinos.OrderByDescending(t => t.DataCriacao))
+        {
+            <div class="lista-item @(treino.Ativo && treino.Publicado ? "lista-item-destaque" : "")">
+                <div class="lista-info">
+                    <strong>@treino.Nome — @(treino.Objetivo ?? "sem foco definido")</strong>
+                    <small>
+                        @treino.Itens.Count exercícios
+                        @(treino.Publicado ? (treino.Ativo ? "· em uso pelo aluno" : "· alternativo") : "· oculto do aluno")
+                        · criado em @treino.DataCriacao.ToLocalTime().ToString("dd/MM/yyyy")
+                    </small>
+                </div>
+                <div class="lista-acoes lista-acoes-multiplo">
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoDetalhe" asp-route-id="@treino.Id" class="btn btn-ghost btn-sm">Ver ficha</a>
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoEditar" asp-route-id="@treino.Id" class="btn btn-ghost btn-sm">Editar</a>
+                    <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoExcluir" asp-route-id="@treino.Id"
+                          onsubmit="return confirm('Excluir o treino &quot;@treino.Nome&quot;? Esta ação não pode ser desfeita.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<a asp-area="Admin" asp-controller="Admin" asp-action="Alunos" class="btn btn-ghost btn-sm" style="margin-top:1.8rem;">
+    &larr; Voltar para alunos
+</a>

@@ -1,0 +1,124 @@
+@model AlunoPerfilViewModel
+@{
+    var nome = ViewData["UsuarioNome"] as string ?? "Aluno";
+    var iniciais = string.Concat(nome.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+}
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="aviso">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (TempData["Aviso"] is string aviso)
+{
+    <div class="aviso aviso-erro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>@aviso</span>
+    </div>
+}
+
+<div class="saudacao">
+    <h2>Meu <em>perfil</em></h2>
+    <p>Seus dados cadastrais e informações de acompanhamento.</p>
+</div>
+
+<div style="display:flex; align-items:center; gap:1.2rem; margin-bottom:1.6rem;">
+    <div style="position:relative; width:96px; height:96px;">
+        @if (!string.IsNullOrEmpty(Model.FotoUrl))
+        {
+            <img src="@Model.FotoUrl" alt="Foto de perfil"
+                 style="width:96px; height:96px; border-radius:50%; object-fit:cover; border:2px solid var(--green-line);" />
+        }
+        else
+        {
+            <span class="avatar" style="width:96px; height:96px; font-size:1.8rem;" aria-hidden="true">@iniciais</span>
+        }
+    </div>
+    <div>
+        <strong style="font-family:var(--font-display); font-size:1.3rem;">@Model.Nome</strong>
+        <p style="margin:0.15rem 0 0;"><small style="color:var(--green); text-transform:uppercase; letter-spacing:0.14em; font-size:0.72rem;">Aluno Atlas desde @Model.MembroDesde · Conta @Model.Plano</small></p>
+        <form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="AtualizarFoto"
+              enctype="multipart/form-data" style="margin-top:0.5rem;">
+            @Html.AntiForgeryToken()
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer; display:inline-flex; align-items:center; gap:0.4rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Alterar foto
+                <input type="file" name="foto" accept="image/jpeg,image/png,image/webp"
+                       style="display:none;"
+                       onchange="this.form.submit()" />
+            </label>
+            <span style="color:var(--muted-2); font-size:0.72rem; margin-left:0.4rem;">JPG, PNG ou WebP · máx. 5 MB</span>
+        </form>
+    </div>
+</div>
+
+<form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="AtualizarPerfil">
+    @Html.AntiForgeryToken()
+
+    <div class="card" style="max-width:640px;">
+        <div class="form-field">
+            <label for="nomeCompleto">Nome completo</label>
+            <input type="text" id="nomeCompleto" name="nomeCompleto" value="@Model.Nome" required />
+        </div>
+
+        <div class="form-field">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" value="@Model.Email" readonly
+                   style="opacity:0.6; cursor:not-allowed;" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="telefone">Telefone</label>
+                <input type="text" id="telefone" name="telefone" value="@Model.Telefone"
+                       placeholder="(11) 99999-0000" />
+            </div>
+            <div class="form-field">
+                <label>Data de nascimento</label>
+                <input type="text" value="@(Model.DataNascimento?.ToString("dd/MM/yyyy") ?? "—")" readonly
+                       style="opacity:0.6; cursor:not-allowed;" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label>Personal responsável</label>
+            <input type="text" value="@Model.Personal" readonly
+                   style="opacity:0.6; cursor:not-allowed;" />
+        </div>
+
+        <div class="form-field">
+            <label for="objetivo">Objetivo</label>
+            <textarea id="objetivo" name="objetivo" rows="3"
+                      placeholder="Ex.: Hipertrofia, emagrecimento, resistência...">@Model.Objetivo</textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:0.7rem; margin-top:0.6rem;">
+            <a asp-area="Aluno" asp-controller="Aluno" asp-action="Perfil" class="btn btn-ghost btn-sm">Cancelar</a>
+            <button type="submit" class="btn btn-primary btn-sm">Salvar alterações</button>
+        </div>
+    </div>
+</form>
+
+<div class="painel-secao">
+    <h2>Sua ficha</h2>
+    <span>Avaliações e histórico — em breve</span>
+</div>
+<div class="lista-painel">
+    <div class="lista-item">
+        <div class="lista-info">
+            <strong>Histórico de avaliações físicas</strong>
+            <small>Módulo em preparação — será alimentado pelo seu personal.</small>
+        </div>
+        <div class="lista-acoes"><span class="chip chip-cinza">Em breve</span></div>
+    </div>
+    <div class="lista-item">
+        <div class="lista-info">
+            <strong>Medidas e evolução de carga</strong>
+            <small>Módulo em preparação.</small>
+        </div>
+        <div class="lista-acoes"><span class="chip chip-cinza">Em breve</span></div>
+    </div>
+</div>
