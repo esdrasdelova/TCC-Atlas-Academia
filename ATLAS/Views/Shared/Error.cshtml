@@ -1,0 +1,36 @@
+﻿@model ErrorViewModel
+@{
+    ViewData["Title"] = "Erro";
+    var status = Context.Request.Query["statusCode"].ToString();
+    if (string.IsNullOrEmpty(status)) { status = "500"; }
+    var principal = status == "404" ? "4" : status == "500" ? "5" : status.Substring(0, 1);
+    var meio = status.Length > 2 ? status.Substring(1, 1) : "0";
+    var fim = status.Length > 2 ? status.Substring(2, 1) : "0";
+    var titulo = status == "404" ? "Página não encontrada" : "Algo deu errado";
+    var mensagem = status == "404"
+        ? "O endereço que você procura não existe ou foi movido. Confira o link ou volte para a página inicial."
+        : "Encontramos um problema inesperado ao processar sua solicitação. Nossa equipe já foi notificada.";
+}
+
+<div class="error-card">
+    <div class="codigo" aria-hidden="true">@principal<span>@meio</span>@fim</div>
+
+    <h1>@titulo</h1>
+    <p>@mensagem</p>
+
+    <div class="hero-actions" style="justify-content:center;">
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">Ir para o início
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 3 4 4-4 4M20 7H4"/></svg>
+        </a>
+        <button type="button" class="btn btn-ghost" onclick="window.history.back()">Voltar</button>
+    </div>
+
+    @if (Model.ShowRequestId)
+    {
+        <details class="erro-detalhe">
+            <summary>Detalhes técnicos</summary>
+            <p>Id da solicitação: <code>@Model.RequestId</code></p>
+            <p>Em <strong>Desenvolvimento</strong>, os detalhes completos da exceção aparecem abaixo. Esse recurso não deve estar habilitado em produção.</p>
+        </details>
+    }
+</div>

@@ -1,0 +1,22 @@
+@{
+    var papel = User.IsInRole(ATLAS.Models.Permissoes.Administrador) ? "administrador"
+        : User.IsInRole(ATLAS.Models.Permissoes.Personal) ? "personal trainer"
+        : "aluno";
+}
+
+<div class="auth-card">
+    <h1>Acesso <span class="txt-verde">restrito</span></h1>
+    <p>
+        Sua conta é do perfil <strong>@papel</strong> e não possui permissão para acessar
+        esta área do sistema. Essa tentativa foi registrada.
+    </p>
+
+    <div class="aviso">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span>Se você acredita que isso é um erro, fale com a administração da academia.</span>
+    </div>
+
+    <a asp-area="" asp-controller="Home" asp-action="Index" class="btn btn-primary btn-block btn-lg">
+        Voltar ao início
+    </a>
+</div>

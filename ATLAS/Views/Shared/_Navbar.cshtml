@@ -1,0 +1,27 @@
+<header class="navbar" id="navbar">
+    <div class="container navbar-inner">
+        <a asp-controller="Home" asp-action="Index" class="brand" aria-label="Atlas - Página inicial">
+            <img src="~/images/logo-atlas.png" alt="Atlas" class="brand-logo" asp-append-version="true" />
+        </a>
+
+        <nav class="nav-links" id="navLinks" aria-label="Navegação principal">
+            <a asp-controller="Home" asp-action="Index" class="nav-link" data-rota="/">Início</a>
+            <a asp-controller="Sobre" asp-action="Index" class="nav-link" data-rota="/sobre">Sobre nós</a>
+            <a asp-controller="Modalidades" asp-action="Index" class="nav-link" data-rota="/modalidades">Modalidades</a>
+            <a asp-controller="Planos" asp-action="Index" class="nav-link" data-rota="/planos">Planos</a>
+            <a asp-controller="Contato" asp-action="Index" class="nav-link" data-rota="/contato">Contato</a>
+            <div class="nav-cta-mobile">
+                <a asp-area="Account" asp-controller="Account" asp-action="Login" class="btn btn-ghost">Entrar</a>
+                <a asp-area="Account" asp-controller="Account" asp-action="Cadastro" class="btn btn-primary">Comece agora</a>
+            </div>
+        </nav>
+
+        <div class="navbar-actions">
+            <a asp-area="Account" asp-controller="Account" asp-action="Login" class="btn btn-ghost">Entrar</a>
+            <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary">Agende sua aula</a>
+            <button class="hamburger" id="hamburger" aria-label="Abrir menu" aria-expanded="false" aria-controls="navLinks">
+                <span></span><span></span><span></span>
+            </button>
+        </div>
+    </div>
+</header>

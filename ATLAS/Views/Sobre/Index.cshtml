@@ -1,0 +1,123 @@
+@{
+    ViewData["Title"] = "Sobre nós";
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Sobre nós</p>
+        <h1 class="reveal">Mais que uma academia.<br />Reabilitação e <span class="txt-verde">treinamento</span>.</h1>
+        <p class="reveal">
+            A Atlas é um centro focado em reabilitação e treinamento, oferecendo
+            fisioterapia, pilates e academia. Nosso objetivo é acompanhar a evolução
+            de cada paciente e cliente, tanto na reabilitação quanto no treinamento
+            e emagrecimento.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+
+    <section class="grid-2 historia">
+        <div class="reveal">
+            <h2 class="bloco-titulo">Nossa <span class="txt-verde">história</span></h2>
+            <p>
+                A Atlas é um centro focado em reabilitação e treinamento, atuando com
+                fisioterapia, pilates e academia.
+            </p>
+            <p>
+                Nossos atendimentos visam sempre a evolução dos nossos pacientes e clientes,
+                tanto na reabilitação quanto no treinamento e emagrecimento.
+            </p>
+            <p>
+                Estamos há 7 anos no mercado, trabalhando sempre com profissionais
+                qualificados e especializados em tratamentos e treinamentos específicos.
+            </p>
+
+            <ul class="timeline">
+                <li><strong>Há 7 anos</strong> no mercado de reabilitação e treinamento, com atuação em fisioterapia, pilates e academia.</li>
+                <li><strong>Desde o início</strong> profissionais qualificados e especializados em tratamentos e treinamentos específicos para diversas modalidades que envolvem a musculação.</li>
+            </ul>
+        </div>
+
+        <div class="sobre-visual reveal" aria-hidden="true">
+            <div class="sobre-card">
+                <span class="sobre-card-num">01</span>
+                <h4>Reabilitação e treinamento</h4>
+                <p>Centro focado em reabilitação e treinamento, com atuação em fisioterapia, pilates e academia.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">02</span>
+                <h4>Evolução dos atendimentos</h4>
+                <p>Atendimentos que visam sempre a evolução dos pacientes e clientes, na reabilitação, no treinamento e no emagrecimento.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">03</span>
+                <h4>Profissionais qualificados</h4>
+                <p>Desde o início, a Atlas trabalha com profissionais qualificados e especializados.</p>
+            </div>
+            <div class="sobre-card">
+                <span class="sobre-card-num">04</span>
+                <h4>Tratamentos específicos</h4>
+                <p>Tratamentos e treinamentos específicos para diversas modalidades que envolvem a musculação.</p>
+            </div>
+        </div>
+    </section>
+
+    <section style="margin-top:6rem;" id="galeria">
+        <p class="kicker reveal">Conheça a Atlas</p>
+        <h2 class="bloco-titulo reveal">Nossa <span class="txt-verde">estrutura</span></h2>
+        <div class="grid-3 galeria" style="margin-top:2.2rem;">
+            <figure class="galeria-item reveal" data-galeria="fachada" role="button" tabindex="0" aria-label="Ampliar fotos da fachada">
+                <img src="~/images/fachada.jpg" alt="Fachada da Atlas" asp-append-version="true" />
+                <figcaption>Nossa fachada</figcaption>
+            </figure>
+            <figure class="galeria-item reveal" data-galeria="academia" role="button" tabindex="0" aria-label="Ampliar fotos da academia">
+                <img src="~/images/academia.jpg" alt="Academia Atlas" asp-append-version="true" />
+                <figcaption>Academia</figcaption>
+            </figure>
+            <figure class="galeria-item reveal" data-galeria="pilates" role="button" tabindex="0" aria-label="Ampliar fotos do espaço pilates e fisioterapia">
+                <img src="~/images/pilates.jpg" alt="Espaço pilates e fisioterapia" asp-append-version="true" />
+                <figcaption>Espaço pilates e fisioterapia</figcaption>
+            </figure>
+        </div>
+    </section>
+
+    <section style="margin-top:6rem;">
+        <p class="kicker reveal">Como atuamos</p>
+        <h2 class="bloco-titulo reveal">Nossa <span class="txt-verde">atuação</span></h2>
+        <div class="grid-3" style="margin-top:2.2rem;">
+            <article class="valor-card reveal">
+                <h3><em>Reabilitação</em></h3>
+                <p>Atendemos pessoas que buscam evolução e acompanhamento durante seus processos de reabilitação.</p>
+            </article>
+            <article class="valor-card reveal">
+                <h3><em>Treinamento</em></h3>
+                <p>Trabalhamos com treinamento e modalidades relacionadas à musculação, respeitando os objetivos de cada cliente.</p>
+            </article>
+            <article class="valor-card reveal">
+                <h3><em>Profissionais qualificados</em></h3>
+                <p>Desde o início, a Atlas trabalha com profissionais qualificados e especializados em tratamentos e treinamentos específicos.</p>
+            </article>
+        </div>
+    </section>
+
+    <section style="margin-top:6rem;" id="cta">
+        <div class="cta-inner reveal" style="text-align:center;">
+            <h2 class="cta-title">Quer evoluir <span class="txt-verde">com a gente</span>?</h2>
+            <p class="lead" style="margin:0 auto 2rem;">Agende seu atendimento e conheça a Atlas por dentro.</p>
+            <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-xl">Agende seu atendimento</a>
+        </div>
+    </section>
+</div>
+
+<div class="galeria-modal" id="galeriaModal" aria-hidden="true" aria-label="Galeria de fotos">
+    <button type="button" class="galeria-close" id="galeriaFechar" aria-label="Fechar galeria" title="Fechar">&times;</button>
+    <div class="galeria-modal-inner">
+        <img class="galeria-slide" id="galeriaSlide" src="" alt="" />
+        <button type="button" class="galeria-nav galeria-prev" id="galeriaPrev" aria-label="Foto anterior">&#8249;</button>
+        <button type="button" class="galeria-nav galeria-next" id="galeriaNext" aria-label="Próxima foto">&#8250;</button>
+        <div class="galeria-counter" id="galeriaCounter">1 / 1</div>
+    </div>
+</div>

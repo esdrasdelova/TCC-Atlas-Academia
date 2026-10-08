@@ -1,0 +1,31 @@
+# ============================================================
+#  ATLAS — deploy no Render.com (plano gratuito)
+#  Uso: no Render, "New" > "Blueprint" > apontar para este repositório.
+#  As variáveis marcadas com "sync: false" precisam ser preenchidas
+#  no painel do Render (Environment).
+# ============================================================
+
+services:
+  - type: web
+    name: atlas-academia
+    runtime: dotnet
+    plan: free
+    region: oregon
+    buildCommand: dotnet publish ATLAS/ATLAS.csproj -c Release -o out
+    startCommand: dotnet out/ATLAS.dll
+    healthCheckPath: /healthz
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      # Necessário atrás do proxy do Render (X-Forwarded-Proto) para não redirecionar em loop
+      - key: ConfiarProxy
+        value: "true"
+      # Preencher no painel do Render:
+      - key: ConnectionStrings__Atlas
+        sync: false
+      - key: IA__ApiKey
+        sync: false
+      - key: IA__BaseUrl
+        value: https://api.groq.com/openai/v1
+      - key: IA__Modelo
+        value: openai/gpt-oss-120b
