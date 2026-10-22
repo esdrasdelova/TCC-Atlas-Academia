@@ -1,0 +1,33 @@
+@model List<TreinoExercicio>
+
+<div class="treino-tabela-wrap">
+    <table class="treino-tabela">
+        <thead>
+            <tr>
+                <th class="col-num">#</th>
+                <th>Exercício</th>
+                <th>Grupo</th>
+                <th class="col-centro">Séries</th>
+                <th class="col-centro">Repetições</th>
+                <th class="col-centro">Carga</th>
+                <th class="col-centro">Descanso</th>
+                <th>Observações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td class="col-num"><span class="exercicio-num">@item.Ordem.ToString("00")</span></td>
+                    <td><strong>@item.Exercicio.Nome</strong></td>
+                    <td><span class="chip chip-cinza">@item.Exercicio.GrupoMuscular</span></td>
+                    <td class="col-centro">@item.Series</td>
+                    <td class="col-centro"><em>@item.Repeticoes</em></td>
+                    <td class="col-centro">@(item.Carga ?? "—")</td>
+                    <td class="col-centro">@(item.DescansoSegundos > 0 ? item.DescansoSegundos + "s" : "—")</td>
+                    <td class="col-obs">@(item.Observacoes ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

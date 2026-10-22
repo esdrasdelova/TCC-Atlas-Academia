@@ -1,0 +1,83 @@
+@model PersonalFormViewModel
+@{
+    var editando = Model.Id > 0;
+}
+
+<div class="saudacao">
+    <h2>@(editando ? "Editar" : "Novo") <em>profissional</em></h2>
+    <p>@(editando ? "Atualize os dados cadastrais do personal." : "Preencha os dados para criar uma nova conta de personal trainer.")</p>
+</div>
+
+<form asp-area="Admin" asp-controller="Admin" method="post" class="painel-form">
+    @if (editando)
+    {
+        <input type="hidden" asp-for="Id" />
+    }
+
+    <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+
+    <div class="form-row">
+        <div class="form-field">
+            <label asp-for="NomeCompleto"></label>
+            <input asp-for="NomeCompleto" placeholder="Nome completo do profissional" />
+        </div>
+        <div class="form-field">
+            <label asp-for="Email"></label>
+            <input asp-for="Email" placeholder="personal@atlasct.com.br" />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-field">
+            <label asp-for="Telefone"></label>
+            <input asp-for="Telefone" placeholder="(14) 99999-0000" />
+        </div>
+        <div class="form-field">
+            <label asp-for="DataNascimento"></label>
+            <input asp-for="DataNascimento" type="date" />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-field">
+            <label asp-for="RegistroProfissional"></label>
+            <input asp-for="RegistroProfissional" placeholder='Ex.: "000000-G/SP"' />
+        </div>
+        <div class="form-field">
+            <label asp-for="Especialidade"></label>
+            <input asp-for="Especialidade" placeholder="Ex.: Hipertrofia e força" />
+        </div>
+    </div>
+
+    <div class="form-row">
+        <div class="form-field">
+            @if (editando)
+            {
+                <label asp-for="NovaSenha"></label>
+                <input asp-for="NovaSenha" type="password" placeholder="Deixe vazio para manter a senha atual" autocomplete="new-password" />
+                <small class="form-nota">Preencha apenas se quiser redefinir a senha.</small>
+            }
+            else
+            {
+                <label asp-for="Senha"></label>
+                <input asp-for="Senha" type="password" placeholder="Mínimo de 6 caracteres" required minlength="6" autocomplete="new-password" />
+                <small class="form-nota">Armazenada com hash seguro (nunca em texto puro).</small>
+            }
+        </div>
+        <div class="form-field">
+            <label>Situação da conta</label>
+            <label class="check-linha">
+                <input type="checkbox" asp-for="ContaAtiva" />
+                <span>Conta ativa (o profissional pode entrar no sistema)</span>
+            </label>
+        </div>
+    </div>
+
+    <div style="display:flex; gap:0.9rem; align-items:center; margin-top:0.4rem;">
+        <button type="submit" class="btn btn-primary btn-lg">@(editando ? "Salvar alterações" : "Cadastrar profissional")</button>
+        <a asp-area="Admin" asp-controller="Admin"
+           asp-action="@(editando ? "PersonalDetalhe" : "Personais")"
+           asp-route-id="@(editando ? Model.Id : null)"
+           class="btn btn-ghost btn-sm">Cancelar</a>
+    </div>
+</form>

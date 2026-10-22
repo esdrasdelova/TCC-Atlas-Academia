@@ -1,0 +1,41 @@
+﻿<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Atlas Centro de Treinamento — evolução, saúde e desempenho. Musculação, treinamento funcional, pilates e fisioterapia." />
+    <meta name="theme-color" content="#0a0a0b" />
+    <meta name="color-scheme" content="dark" />
+    <meta property="og:title" content="Atlas Centro de Treinamento" />
+    <meta property="og:description" content="Evolução, saúde e desempenho. Musculação, treinamento funcional, pilates e fisioterapia." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="@Url.Content("~/images/logo-atlas.png")" />
+    <link rel="icon" href="~/images/logo-atlas.png" asp-append-version="true" />
+    <link rel="apple-touch-icon" href="~/images/logo-atlas.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/assistente.css" asp-append-version="true" />
+</head>
+<body>
+    <span class="scroll-progress" id="scrollProgress" aria-hidden="true"></span>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <partial name="_Navbar" />
+
+    <main role="main" id="conteudo">
+        @RenderBody()
+    </main>
+
+    <partial name="_Footer" />
+
+    <partial name="_Assistente" />
+
+    <button type="button" class="voltar-topo" id="voltarTopo" aria-label="Voltar ao topo">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    </button>
+
+    <script src="~/js/site.js" asp-append-version="true" defer></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

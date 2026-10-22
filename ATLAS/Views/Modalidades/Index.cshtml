@@ -1,0 +1,44 @@
+@model List<ModalidadeItem>
+@{
+    ViewData["Title"] = "Modalidades";
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Modalidades</p>
+        <h1 class="reveal">Escolha o seu <span class="txt-verde">treino</span>.</h1>
+        <p class="reveal">
+            Diferentes caminhos, um mesmo destino: a sua melhor performance.
+            Todas as modalidades incluem avaliação física inicial e acompanhamento profissional.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+    <div class="grid-2" style="align-items:stretch; gap:1.4rem;">
+        @foreach (var item in Model)
+        {
+            <article class="mod-grande reveal">
+                <div class="mod-icone">
+                    <partial name="_Icone" model="item.Icone" />
+                </div>
+                <h3>@item.Titulo</h3>
+                <p>@item.Descricao</p>
+                <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary">Agendar aula experimental</a>
+            </article>
+        }
+    </div>
+
+    <section style="margin-top:5rem;" class="reveal">
+        <div class="painel-form">
+            <h2 class="bloco-titulo" style="font-size:1.4rem;">Todas as modalidades <span class="txt-verde">incluem</span></h2>
+            <div class="grid-3" style="margin-top:1.6rem; gap:1rem;">
+                <div class="valor-card"><h3>Avaliação inicial</h3><p>Diagnóstico físico completo antes de começar.</p></div>
+                <div class="valor-card"><h3>App de treinos</h3><p>Acesse seu treino pelo celular, dentro ou fora da Atlas.</p></div>
+                <div class="valor-card"><h3>Acompanhamento</h3><p>Profissionais presentes durante todo o treino.</p></div>
+            </div>
+        </div>
+    </section>
+</div>

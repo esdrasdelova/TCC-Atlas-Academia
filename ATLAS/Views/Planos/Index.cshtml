@@ -1,0 +1,144 @@
+@model List<PlanoItem>
+@{
+    ViewData["Title"] = "Planos";
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Planos</p>
+        <h1 class="reveal">Invista na sua <span class="txt-verde">evolução</span>.</h1>
+        <p class="reveal">
+            Do treino avulso ao trimestral: sem taxa de matrícula, sem letras miúdas.
+            Escolha o plano ideal para o seu momento — a partir de <strong class="txt-verde">R$ 20</strong>.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+    <div class="precos-grid">
+        @foreach (var plano in Model)
+        {
+            <article class="preco-card @(plano.Destaque ? "destaque" : "") reveal">
+                @if (!string.IsNullOrEmpty(plano.Selo))
+                {
+                    <span class="preco-selo">@plano.Selo</span>
+                }
+                <span class="preco-icone" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22">@Html.Raw(IconeSvg(plano.Icone))</svg>
+                </span>
+                <span class="preco-nome">@plano.Nome</span>
+                <div class="preco-valor">
+                    <span class="moeda">R$</span>
+                    <span class="numero">@plano.Preco</span>
+                </div>
+                <span class="preco-periodo">@plano.Periodo</span>
+                @if (!string.IsNullOrEmpty(plano.PrecoInfo))
+                {
+                    <span class="preco-info">@plano.PrecoInfo</span>
+                }
+                <p class="preco-desc">@plano.Descricao</p>
+                <ul class="preco-lista">
+                    @foreach (var beneficio in plano.Beneficios)
+                    {
+                        <li>@beneficio</li>
+                    }
+                </ul>
+                <a asp-controller="Agendamento" asp-action="Index" class="btn @(plano.Destaque ? "btn-primary" : "btn-ghost")">@plano.TextoBotao</a>
+            </article>
+        }
+    </div>
+
+    <div class="planos-confianca reveal">
+        <div class="conf-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+                <path d="M20.59 13.41 11 3.83A2 2 0 0 0 9.59 3.24H4a1 1 0 0 0-1 1v5.59c0 .53.21 1.04.59 1.41l9.58 9.59a2 2 0 0 0 2.83 0l4.59-4.59a2 2 0 0 0 0-2.83Z"/>
+                <circle cx="7.5" cy="7.5" r="0.5" fill="currentColor"/>
+            </svg>
+            <span><strong>Sem taxa de matrícula</strong><br>em nenhum dos planos</span>
+        </div>
+        <div class="conf-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+                <path d="M12 22s8-3.6 8-10V5.4L12 2 4 5.4V12c0 6.4 8 10 8 10Z"/>
+                <path d="m9 11.5 2 2 4-4"/>
+            </svg>
+            <span><strong>Sem fidelidade</strong><br>no plano mensal</span>
+        </div>
+        <div class="conf-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+                <path d="M20.4 12.6a8.5 8.5 0 1 1-2.2-6.2"/>
+                <path d="M22 4 12 14l-3-3"/>
+            </svg>
+            <span><strong>Avaliação física</strong><br>inclusa nos planos</span>
+        </div>
+        <div class="conf-item">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="22" height="22" aria-hidden="true">
+                <rect x="7" y="2" width="10" height="20" rx="2.5"/>
+                <path d="M11 18.5h2"/>
+            </svg>
+            <span><strong>App de treinos</strong><br>Atlas incluso</span>
+        </div>
+    </div>
+
+    <section style="margin-top:5.5rem;">
+        <p class="kicker reveal">Compare</p>
+        <h2 class="bloco-titulo reveal">O que está <span class="txt-verde">incluído</span></h2>
+
+        <div style="overflow-x:auto; margin-top:2rem;" class="reveal">
+            <table class="tabela-comparativo">
+                <thead>
+                    <tr>
+                        <th>Recurso</th>
+                        <th>Avulsa</th>
+                        <th>Mensal</th>
+                        <th>Trimestral</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Musculação</td><td class="no">1 aula</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>App de treinos Atlas</td><td class="no">&mdash;</td><td class="ok">&#10003;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Avaliação física</td><td class="no">&mdash;</td><td class="no">Inicial</td><td class="no">Mensal</td></tr>
+                    <tr><td>Treinamento funcional</td><td class="no">1 aula</td><td class="no">&mdash;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Acompanhamento de personal</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Prioridade nos agendamentos</td><td class="no">&mdash;</td><td class="no">&mdash;</td><td class="ok">&#10003;</td></tr>
+                    <tr><td>Fidelidade</td><td class="no">Nenhuma</td><td class="no">Nenhuma</td><td class="no">3 meses</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="form-nota reveal" style="margin-top:1.2rem;">
+            Valores promocionais para novos alunos. Consulte condições na recepção.
+        </p>
+    </section>
+</div>
+
+<section class="section cta">
+    <div class="container cta-inner reveal">
+        <h2 class="cta-title">
+            Pronto para <span class="txt-gradiente">começar</span>?
+        </h2>
+        <p class="lead">
+            Agende uma aula experimental e conheça a estrutura da Atlas sem compromisso.
+        </p>
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a asp-controller="Agendamento" asp-action="Index" class="btn btn-primary btn-lg">Agende sua aula</a>
+            <a asp-controller="Contato" asp-action="Index" class="btn btn-ghost btn-lg">Fale conosco</a>
+        </div>
+        <span class="cta-selo" aria-hidden="true">
+            <strong>R$20</strong>
+            <small>aula avulsa</small>
+        </span>
+    </div>
+</section>
+
+@functions {
+    // Ícones (SVG inline) de cada card — evita declarar variáveis dentro do @foreach,
+    // o que o Razor não aceita misturado com HTML.
+    private static string IconeSvg(string icone) => icone switch
+    {
+        "raio" => "<path d=\"M13 2 3 14h9l-1 8 10-12h-9l1-8Z\"/>",
+        "calendario" => "<rect x=\"3\" y=\"4\" width=\"18\" height=\"18\" rx=\"2\"/><path d=\"M16 2v4M8 2v4M3 10h18\"/>",
+        _ => "<path d=\"M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0V4Z\"/>"
+              + "<path d=\"M7 6H4.5A1.5 1.5 0 0 0 3 7.5C3 9.5 4.5 11 7 11M17 6h2.5A1.5 1.5 0 0 1 21 7.5C21 9.5 19.5 11 17 11\"/>"
+    };
+}

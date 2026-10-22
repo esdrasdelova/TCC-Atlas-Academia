@@ -1,0 +1,104 @@
+@model AdminDashboardViewModel
+
+<div class="saudacao">
+    <h2>Painel <em>administrativo</em></h2>
+    <p>Visão geral da academia com números reais do sistema.</p>
+</div>
+
+<div class="painel-grid">
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Total de alunos</span>
+            <span class="card-icone"><partial name="_Icone" model='@("users")' /></span>
+        </div>
+        <strong class="card-valor"><em>@Model.TotalAlunos</em></strong>
+        <p>@Model.AlunosAtivos ativos · @Model.AlunosInativos inativos</p>
+        <div class="card-acoes">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Alunos" class="btn btn-primary btn-sm">Gerenciar alunos</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Alunos ativos</span>
+            <span class="card-icone"><partial name="_Icone" model='@("bolt")' /></span>
+        </div>
+        <strong class="card-valor">@Model.AlunosAtivos</strong>
+        <div class="barra" title="Proporção de alunos ativos"><span class="barra-fill barra-verde" style="--preenchido: @(Model.TotalAlunos == 0 ? 0 : Math.Round(100.0 * Model.AlunosAtivos / Model.TotalAlunos))%;"></span></div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Alunos inativos</span>
+            <span class="card-icone"><partial name="_Icone" model='@("pulse")' /></span>
+        </div>
+        <strong class="card-valor">@Model.AlunosInativos</strong>
+        <p>Contas que não conseguem entrar no sistema.</p>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Profissionais (personais)</span>
+            <span class="card-icone"><partial name="_Icone" model='@("badge")' /></span>
+        </div>
+        <strong class="card-valor">@Model.TotalPersonais</strong>
+        <div class="card-acoes">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Personais" class="btn btn-primary btn-sm">Gerenciar profissionais</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-topo">
+            <span class="card-label">Treinos personalizados</span>
+            <span class="card-icone"><partial name="_Icone" model='@("dumbbell")' /></span>
+        </div>
+        <strong class="card-valor"><em>@Model.TreinosPersonalizados</em></strong>
+        <p>Treinos publicados e visíveis para os alunos.</p>
+        <div class="card-acoes">
+            <a asp-area="Admin" asp-controller="Admin" asp-action="Treinos" class="btn btn-ghost btn-sm">Gerenciar treinos</a>
+        </div>
+    </div>
+</div>
+
+<div class="painel-secao">
+    <h2>Cadastros recentes</h2>
+    <span>Últimas contas criadas no sistema</span>
+</div>
+
+@if (Model.CadastrosRecentes.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3 2.8-4.7 5.5-4.7s4.9 1.7 5.5 4.7"/><path d="M15.5 5.4a3.2 3.2 0 0 1 0 5.2"/><path d="M17.3 14.6c1.8.6 3 2 3.4 4.4"/></svg>
+        </span>
+        <strong>Nenhuma conta cadastrada ainda</strong>
+        <small>Os cadastros de alunos, personais e administradores aparecerão aqui.</small>
+    </div>
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var cadastro in Model.CadastrosRecentes)
+        {
+            var iniciais = string.Concat(cadastro.Nome.Split(' ', StringSplitOptions.RemoveEmptyEntries).Take(2).Select(p => char.ToUpper(p[0])));
+            <div class="lista-item">
+                <span class="avatar" aria-hidden="true">@iniciais</span>
+                <div class="lista-info">
+                    <strong>@cadastro.Nome</strong>
+                    <small>@cadastro.Papel · cadastrado em @cadastro.Data.ToLocalTime().ToString("dd/MM/yyyy")</small>
+                </div>
+                <div class="lista-acoes">
+                    <span class="chip chip-cinza">@cadastro.Papel</span>
+                    @if (cadastro.Papel == Permissoes.Aluno)
+                    {
+                        <a asp-area="Admin" asp-controller="Admin" asp-action="AlunoDetalhe" asp-route-id="@cadastro.Id" class="btn btn-ghost btn-sm">Ver</a>
+                    }
+                    else if (cadastro.Papel == Permissoes.Personal)
+                    {
+                        <a asp-area="Admin" asp-controller="Admin" asp-action="PersonalDetalhe" asp-route-id="@cadastro.Id" class="btn btn-ghost btn-sm">Ver</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

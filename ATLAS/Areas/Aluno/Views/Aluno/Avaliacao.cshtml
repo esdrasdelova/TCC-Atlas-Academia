@@ -1,0 +1,40 @@
+@model AlunoAvaliacaoViewModel
+
+<div class="saudacao">
+    <h2>Avaliação <em>física</em></h2>
+    <p>Acompanhe o status da sua próxima avaliação com medidas e acompanhamento do personal.</p>
+</div>
+
+@if (Model.ProximaAvaliacao.HasValue)
+{
+    <div class="painel-grid">
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Próxima avaliação</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("pulse")' /></span>
+            </div>
+            <strong class="card-valor">@Model.ProximaAvaliacao.Value.ToString("dd/MM/yyyy")</strong>
+            <p>Medidas corporais e acompanhamento com <em>@Model.PersonalNome</em>.</p>
+            <div class="card-acoes">
+                <a asp-area="" asp-controller="Agendamento" asp-action="Index" class="btn btn-ghost btn-sm">Desejo remarcar</a>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Preparação</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("bolt")' /></span>
+            </div>
+            <strong class="card-valor">Você está <em>agendado</em></strong>
+            <p>Compareça no horário combinado. Em caso de imprevisto, avise seu personal com antecedência.</p>
+            <div class="card-acoes">
+                <a asp-area="Aluno" asp-controller="Aluno" asp-action="Treinos" class="btn btn-ghost btn-sm">Ver meus treinos</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "pulse", Titulo = "Nenhuma avaliação agendada", Descricao = "Solicite a avaliação física com medidas corporais e acompanhamento do seu personal. A recepção confirma a data e o horário.", RotuloCta = "Agendar avaliação física", UrlCta = "/agendamento" })' />
+}

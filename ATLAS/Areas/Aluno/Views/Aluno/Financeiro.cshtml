@@ -1,0 +1,141 @@
+@model FinanceiroViewModel
+@{
+    var fmt = new System.Globalization.CultureInfo("pt-BR");
+    var hoje = DateTime.Today;
+
+    string RotuloStatus(ATLAS.Models.Enums.StatusFatura s) => s switch
+    {
+        ATLAS.Models.Enums.StatusFatura.Paga => "Paga",
+        ATLAS.Models.Enums.StatusFatura.Atrasada => "Atrasada",
+        _ => "Em aberto"
+    };
+    string ClasseStatus(ATLAS.Models.Enums.StatusFatura s) => s switch
+    {
+        ATLAS.Models.Enums.StatusFatura.Paga => "chip-verde",
+        ATLAS.Models.Enums.StatusFatura.Atrasada => "chip-erro",
+        _ => "chip-cinza"
+    };
+}
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="aviso">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (TempData["Aviso"] is string aviso)
+{
+    <div class="aviso aviso-erro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>@aviso</span>
+    </div>
+}
+
+<div class="saudacao">
+    <h2>Pagamentos e <em>faturas</em></h2>
+    <p>Consulte as faturas e a situação financeira da sua matrícula em um só lugar.</p>
+</div>
+
+@if (Model.TemDados)
+{
+    <div class="painel-grid">
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Total pago</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("badge")' /></span>
+            </div>
+            <strong class="card-valor">R$ @Model.TotalPago.ToString("N2", fmt)</strong>
+            <p>@Model.Faturas.Count(f => f.Status == ATLAS.Models.Enums.StatusFatura.Paga) fatura(s) quitada(s).</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Em aberto</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("pulse")' /></span>
+            </div>
+            <strong class="card-valor">R$ @Model.TotalEmAberto.ToString("N2", fmt)</strong>
+            <p>@Model.Faturas.Count(f => f.Status != ATLAS.Models.Enums.StatusFatura.Paga) fatura(s) pendente(s).</p>
+        </div>
+    </div>
+
+    <div class="painel-secao">
+        <h2>Suas faturas</h2>
+        <span>@Model.Faturas.Count registro(s)</span>
+    </div>
+    <div class="lista-painel">
+        @foreach (var f in Model.Faturas)
+        {
+            var atrasada = f.Status != ATLAS.Models.Enums.StatusFatura.Paga && f.DataVencimento.Date < hoje;
+            <div class="lista-item">
+                <div class="lista-info">
+                    <strong>@f.Descricao · R$ @f.Valor.ToString("N2", fmt)</strong>
+                    <small>
+                        Vence em @f.DataVencimento.ToLocalTime().ToString("dd/MM/yyyy", fmt)
+                        @if (f.DataPagamento.HasValue)
+                        {
+                            <text> · pago em @f.DataPagamento.Value.ToLocalTime().ToString("dd/MM/yyyy", fmt)</text>
+                        }
+                        @if (atrasada)
+                        {
+                            <text> · vencida</text>
+                        }
+                    </small>
+                </div>
+                <div class="lista-acoes">
+                    <span class="chip @ClasseStatus(f.Status)">@RotuloStatus(f.Status)</span>
+                    @if (f.Status != ATLAS.Models.Enums.StatusFatura.Paga)
+                    {
+                        <form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="PagarFatura" asp-route-id="@f.Id">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-primary btn-sm">Marcar paga</button>
+                        </form>
+                    }
+                    <form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="ExcluirFatura" asp-route-id="@f.Id"
+                          onsubmit="return confirm('Remover esta fatura?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "badge", Titulo = "Nenhuma fatura registrada", Descricao = "Registre abaixo suas mensalidades para acompanhar o histórico de pagamentos do seu plano.", RotuloCta = "Ver meu perfil", UrlCta = "/aluno/perfil" })' />
+}
+
+<div class="painel-secao" style="margin-top:2rem;">
+    <h2>Nova fatura</h2>
+    <span>Registre uma cobrança do seu plano</span>
+</div>
+
+<form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="SalvarFatura">
+    @Html.AntiForgeryToken()
+    <div class="card" style="max-width:640px;">
+        <div class="form-field">
+            <label for="descricao">Descrição</label>
+            <input type="text" id="descricao" name="descricao" required maxlength="120"
+                   placeholder="Ex.: Mensalidade — Plano Anual" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="valor">Valor (R$)</label>
+                <input type="number" step="0.01" min="0.01" id="valor" name="valor" required placeholder="Ex.: 149.90" />
+            </div>
+            <div class="form-field">
+                <label for="dataVencimento">Vencimento</label>
+                <input type="date" id="dataVencimento" name="dataVencimento"
+                       value="@DateTime.Today.AddDays(30).ToString("yyyy-MM-dd")" required />
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:0.6rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Registrar fatura</button>
+        </div>
+    </div>
+</form>

@@ -1,0 +1,61 @@
+@model SiteConfig
+
+<div class="saudacao">
+    <h2>Configurações do <em>site</em></h2>
+    <p>Informações exibidas nas páginas públicas — editáveis pelo ADM.</p>
+</div>
+
+<div class="demo-banner">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+    <span>Atualmente os valores vêm do arquivo appsettings.json. O salvamento por aqui será ativado junto com o banco de dados.</span>
+</div>
+
+<form class="painel-form">
+    <fieldset style="border:none; padding:0; margin:0;">
+        <legend style="font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.14em; font-size:0.85rem; color:var(--green); margin:1.6rem 0 1rem;">Identidade</legend>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="nome">Nome da academia</label>
+                <input type="text" id="nome" value="@Model.Nome" disabled />
+            </div>
+            <div class="form-field">
+                <label for="slogan">Slogan</label>
+                <input type="text" id="slogan" value="@Model.Slogan" disabled />
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset style="border:none; padding:0; margin:0;">
+        <legend style="font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.14em; font-size:0.85rem; color:var(--green); margin:1.6rem 0 1rem;">Contato e endereço</legend>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="telefone">Telefone / WhatsApp</label>
+                <input type="tel" id="telefone" value="@Model.Telefone" disabled />
+            </div>
+            <div class="form-field">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" value="@Model.Email" disabled />
+            </div>
+        </div>
+        <div class="form-field">
+            <label for="endereco">Endereço</label>
+            <input type="text" id="endereco" value="@Model.Endereco" disabled />
+        </div>
+    </fieldset>
+
+    <fieldset style="border:none; padding:0; margin:0;">
+        <legend style="font-family:var(--font-display); text-transform:uppercase; letter-spacing:0.14em; font-size:0.85rem; color:var(--green); margin:1.6rem 0 1rem;">Horários</legend>
+        <div class="form-row">
+            <div class="form-field">
+                <label for="horarioSemana">Segunda a sexta</label>
+                <input type="text" id="horarioSemana" value="@Model.HorarioSemana" disabled />
+            </div>
+            <div class="form-field">
+                <label for="horarioSabado">Sábado</label>
+                <input type="text" id="horarioSabado" value="@Model.HorarioSabado" disabled />
+            </div>
+        </div>
+    </fieldset>
+
+    <button type="button" class="btn btn-primary btn-desabilitado" title="Salvamento disponível na próxima etapa">Salvar alterações</button>
+</form>

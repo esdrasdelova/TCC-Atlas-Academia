@@ -1,0 +1,124 @@
+@model SiteConfig
+@{
+    ViewData["Title"] = "Contato";
+    var aviso = TempData["Aviso"] as string;
+    var erro = TempData["Erro"] as string;
+}
+
+<section class="page-hero">
+    <div class="hero-bg" aria-hidden="true">
+    </div>
+    <div class="container page-hero-inner">
+        <p class="kicker reveal">Contato</p>
+        <h1 class="reveal">Fale com a <span class="txt-verde">Atlas</span>.</h1>
+        <p class="reveal">
+            Dúvidas sobre planos, modalidades ou agendamentos? Envie sua mensagem
+            ou venha nos visitar — a porta está sempre aberta.
+        </p>
+    </div>
+</section>
+
+<div class="container pagina">
+    <div class="contato-grid">
+
+        <div class="painel-form reveal">
+            <h2 class="bloco-titulo" style="font-size:1.4rem;">Envie sua <span class="txt-verde">mensagem</span></h2>
+
+            @if (!string.IsNullOrEmpty(aviso))
+            {
+                <div class="aviso">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+                    <span>@aviso</span>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(erro))
+            {
+                <div class="aviso aviso-erro">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+                    <span>@erro</span>
+                </div>
+            }
+
+            <form asp-controller="Contato" asp-action="Enviar" method="post">
+                <div class="form-row">
+                    <div class="form-field">
+                        <label for="nome">Nome</label>
+                        <input type="text" id="nome" name="nome" placeholder="Seu nome" required />
+                    </div>
+                    <div class="form-field">
+                        <label for="email">E-mail</label>
+                        <input type="email" id="email" name="email" placeholder="seu@email.com" required />
+                    </div>
+                </div>
+
+                <div class="form-field">
+                    <label for="assunto">Assunto</label>
+                    <select id="assunto" name="assunto" required>
+                        <option value="" selected disabled>Selecione o assunto</option>
+                        <option>Planos e matrícula</option>
+                        <option>Modalidades</option>
+                        <option>Agendamento de aula experimental</option>
+                        <option>Aula de pilates / fisioterapia</option>
+                        <option>Outro assunto</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="mensagem">Mensagem</label>
+                    <textarea id="mensagem" name="mensagem" rows="5" placeholder="Como podemos ajudar?" required></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg btn-block">Enviar mensagem</button>
+            </form>
+        </div>
+
+        <aside class="reveal">
+            <ul class="contato-info">
+                <li>
+                    <strong>Endereço</strong>
+                    <span>@Model.Endereco</span>
+                </li>
+                <li>
+                    <strong>Telefone / WhatsApp</strong>
+                    <span>@Model.Telefone</span>
+                    <small>Segunda a sábado, em horário comercial.</small>
+                </li>
+                <li>
+                    <strong>E-mail</strong>
+                    <span>@Model.Email</span>
+                </li>
+                <li>
+                    <strong>Horários</strong>
+                    <span>@Model.HorarioSemana</span>
+                    <small>@Model.HorarioSabado</small>
+                </li>
+            </ul>
+
+            <div class="painel-form" style="padding:1rem;">
+                <h2 class="bloco-titulo" style="font-size:1.25rem; margin:0.6rem 0 0.9rem;">Onde <span class="txt-verde">estamos</span></h2>
+
+                @if (!string.IsNullOrEmpty(Model.MapaEmbedUrl))
+                {
+                    <div class="mapa-embed">
+                        <iframe src="@Model.MapaEmbedUrl"
+                                title="Localização da Academia Atlas no Google Maps"
+                                loading="lazy" allowfullscreen
+                                referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
+                }
+
+                <div class="mapa-endereco">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+                    <span>@Model.Endereco</span>
+                    @if (!string.IsNullOrEmpty(Model.MapaLinkUrl))
+                    {
+                        <a href="@Model.MapaLinkUrl" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+                            Abrir no Google Maps
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7M9 7h8v8"/></svg>
+                        </a>
+                    }
+                </div>
+            </div>
+        </aside>
+    </div>
+</div>

@@ -1,0 +1,187 @@
+@model MedidasViewModel
+@{
+    var fmt = new System.Globalization.CultureInfo("pt-BR");
+
+    // Calcula a variação de uma medida entre a última e a penúltima aferição.
+    string Variacao(decimal? atual, decimal? anterior)
+    {
+        if (atual == null || anterior == null) return "";
+        var diff = atual.Value - anterior.Value;
+        if (diff == 0) return "sem alteração";
+        var sinal = diff > 0 ? "+" : "";
+        return $"{sinal}{diff.ToString("0.0", fmt)} desde a anterior";
+    }
+    string CorVariacao(decimal? atual, decimal? anterior)
+    {
+        if (atual == null || anterior == null) return "var(--muted-2)";
+        var diff = atual.Value - anterior.Value;
+        if (diff == 0) return "var(--muted-2)";
+        return diff > 0 ? "var(--green)" : "#ff6b6b";
+    }
+}
+
+@if (TempData["Sucesso"] is string sucesso)
+{
+    <div class="aviso">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (TempData["Aviso"] is string aviso)
+{
+    <div class="aviso aviso-erro">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        <span>@aviso</span>
+    </div>
+}
+
+<div class="saudacao">
+    <h2>Medidas e <em>evolução</em></h2>
+    <p>Registre suas medidas a cada avaliação e acompanhe a evolução do seu corpo.</p>
+</div>
+
+@if (Model.TemDados)
+{
+    <div class="painel-grid">
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Peso atual</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("pulse")' /></span>
+            </div>
+            <strong class="card-valor">@(Model.Atual!.PesoKg?.ToString("0.0", fmt) ?? "—") <em>kg</em></strong>
+            <p style="color:@CorVariacao(Model.Atual.PesoKg, Model.Anterior?.PesoKg);">@Variacao(Model.Atual.PesoKg, Model.Anterior?.PesoKg)</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Cintura</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("space")' /></span>
+            </div>
+            <strong class="card-valor">@(Model.Atual.CinturaCm?.ToString("0.0", fmt) ?? "—") <em>cm</em></strong>
+            <p style="color:@CorVariacao(Model.Atual.CinturaCm, Model.Anterior?.CinturaCm);">@Variacao(Model.Atual.CinturaCm, Model.Anterior?.CinturaCm)</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">% de gordura</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("bolt")' /></span>
+            </div>
+            <strong class="card-valor">@(Model.Atual.PercentualGordura?.ToString("0.0", fmt) ?? "—") <em>%</em></strong>
+            <p style="color:@CorVariacao(Model.Atual.PercentualGordura, Model.Anterior?.PercentualGordura);">@Variacao(Model.Atual.PercentualGordura, Model.Anterior?.PercentualGordura)</p>
+        </div>
+
+        <div class="card">
+            <div class="card-topo">
+                <span class="card-label">Última medição</span>
+                <span class="card-icone card-icone--round"><partial name="_Icone" model='@("clock")' /></span>
+            </div>
+            <strong class="card-valor">@Model.Atual.DataMedicao.ToLocalTime().ToString("dd/MM/yyyy")</strong>
+            <p>@Model.Historico.Count registro(s) no histórico.</p>
+        </div>
+    </div>
+
+    <div class="painel-secao">
+        <h2>Histórico de medições</h2>
+        <span>@Model.Historico.Count registro(s)</span>
+    </div>
+    <div class="lista-painel">
+        @foreach (var m in Model.Historico)
+        {
+            <div class="lista-item">
+                <div class="lista-info">
+                    <strong>@m.DataMedicao.ToLocalTime().ToString("dd/MM/yyyy")</strong>
+                    <small>
+                        @if (m.PesoKg.HasValue) { <text>Peso @m.PesoKg.Value.ToString("0.0", fmt) kg · </text> }
+                        @if (m.CinturaCm.HasValue) { <text>Cintura @m.CinturaCm.Value.ToString("0.0", fmt) cm · </text> }
+                        @if (m.QuadrilCm.HasValue) { <text>Quadril @m.QuadrilCm.Value.ToString("0.0", fmt) cm · </text> }
+                        @if (m.BracoCm.HasValue) { <text>Braço @m.BracoCm.Value.ToString("0.0", fmt) cm · </text> }
+                        @if (m.CoxaCm.HasValue) { <text>Coxa @m.CoxaCm.Value.ToString("0.0", fmt) cm · </text> }
+                        @if (m.PercentualGordura.HasValue) { <text>Gordura @m.PercentualGordura.Value.ToString("0.0", fmt) %</text> }
+                    </small>
+                </div>
+                <div class="lista-acoes">
+                    <form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="ExcluirMedida" asp-route-id="@m.Id"
+                          onsubmit="return confirm('Remover este registro de medidas?');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<div class="painel-secao" style="margin-top:2rem;">
+    <h2>Nova medição</h2>
+    <span>Preencha os campos que você aferiu</span>
+</div>
+
+<form method="post" asp-area="Aluno" asp-controller="Aluno" asp-action="SalvarMedida">
+    @Html.AntiForgeryToken()
+    <div class="card" style="max-width:720px;">
+        <div class="form-field">
+            <label for="dataMedicao">Data da medição</label>
+            <input type="date" id="dataMedicao" name="DataMedicao"
+                   value="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="pesoKg">Peso (kg)</label>
+                <input type="number" step="0.1" min="0" id="pesoKg" name="PesoKg" placeholder="Ex.: 78.5" />
+            </div>
+            <div class="form-field">
+                <label for="alturaCm">Altura (cm)</label>
+                <input type="number" step="0.1" min="0" id="alturaCm" name="AlturaCm" placeholder="Ex.: 178" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="peitoCm">Peito (cm)</label>
+                <input type="number" step="0.1" min="0" id="peitoCm" name="PeitoCm" />
+            </div>
+            <div class="form-field">
+                <label for="cinturaCm">Cintura (cm)</label>
+                <input type="number" step="0.1" min="0" id="cinturaCm" name="CinturaCm" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="quadrilCm">Quadril (cm)</label>
+                <input type="number" step="0.1" min="0" id="quadrilCm" name="QuadrilCm" />
+            </div>
+            <div class="form-field">
+                <label for="bracoCm">Braço (cm)</label>
+                <input type="number" step="0.1" min="0" id="bracoCm" name="BracoCm" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="coxaCm">Coxa (cm)</label>
+                <input type="number" step="0.1" min="0" id="coxaCm" name="CoxaCm" />
+            </div>
+            <div class="form-field">
+                <label for="panturrilhaCm">Panturrilha (cm)</label>
+                <input type="number" step="0.1" min="0" id="panturrilhaCm" name="PanturrilhaCm" />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label for="percentualGordura">Percentual de gordura (%)</label>
+            <input type="number" step="0.1" min="0" max="100" id="percentualGordura" name="PercentualGordura" />
+        </div>
+
+        <div class="form-field">
+            <label for="observacoes">Observações</label>
+            <textarea id="observacoes" name="Observacoes" rows="2" placeholder="Como você se sentiu, contexto da medição..."></textarea>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; margin-top:0.6rem;">
+            <button type="submit" class="btn btn-primary btn-sm">Salvar medição</button>
+        </div>
+    </div>
+</form>

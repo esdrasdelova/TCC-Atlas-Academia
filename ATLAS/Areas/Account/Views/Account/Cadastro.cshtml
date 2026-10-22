@@ -1,0 +1,107 @@
+﻿@{
+    Layout = "_LayoutAuth";
+    var aviso = TempData["Aviso"] as string;
+}
+
+<div class="auth-card">
+    <h1>Comece sua <span class="txt-verde">evolução</span></h1>
+    <p>Crie sua conta de aluno e tenha acesso aos treinos disponibilizados pelo seu personal.</p>
+
+    @if (!string.IsNullOrEmpty(aviso))
+    {
+        <div class="aviso">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+            <span>@aviso</span>
+        </div>
+    }
+
+    <form asp-action="Cadastro" method="post">
+        @Html.AntiForgeryToken()
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="All" class="aviso aviso-erro" role="alert"></div>
+        }
+        <div class="form-field">
+            <label for="nomeCompleto">Nome completo</label>
+            <input type="text" id="nomeCompleto" name="nomeCompleto" placeholder="Ex.: João Silva" required autocomplete="name" />
+        </div>
+
+        <div class="form-row">
+            <div class="form-field">
+                <label for="email">E-mail</label>
+                <input type="email" id="email" name="email" placeholder="seu@email.com" required autocomplete="email" />
+            </div>
+            <div class="form-field">
+                <label for="telefone">Telefone</label>
+                <input type="tel" id="telefone" name="telefone" placeholder="(11) 99999-0000" required
+                       autocomplete="tel" inputmode="numeric" pattern="[0-9 ()\-\+\.]{8,20}"
+                       maxlength="20" title="Informe apenas números (mínimo 8 dígitos)." />
+            </div>
+        </div>
+
+        <div class="form-field">
+            <label for="dataNascimento">Data de nascimento</label>
+            <input type="date" id="dataNascimento" name="dataNascimento" required autocomplete="bday" />
+        </div>
+
+        <div class="form-field">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" name="senha" placeholder="Mínimo de 6 caracteres" required minlength="6" autocomplete="new-password" />
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">Criar minha conta</button>
+        <p class="form-nota" style="margin-top:1rem;">Seus dados serão armazenados com segurança e usados apenas para o acompanhamento do seu treino.</p>
+    </form>
+</div>
+
+<p class="auth-alt">
+    Já tem conta? <a asp-action="Login">Fazer login</a>
+</p>
+
+@section Scripts {
+    <script>
+        // Telefone do cadastro: aceita SOMENTE números.
+        // - keydown bloqueia letras/símbolos no momento da digitação;
+        // - input limpa o que entrar por cola/autocompletar (celular);
+        // - valida a quantidade de dígitos antes de liberar o envio.
+        // O servidor revalida o campo antes de salvar (AccountController).
+        (function () {
+            var campo = document.getElementById("telefone");
+            if (!campo) return;
+
+            var MASCARA = /[()\-+.\s]/; // só formatação passa além dos dígitos; letras nunca
+
+            campo.addEventListener("keydown", function (e) {
+                if (e.ctrlKey || e.metaKey || e.altKey) return; // copiar/colar/atalhos
+                if (e.key.length !== 1) return;                 // Enter, Backspace, setas...
+                var tecla = e.key;
+                if (!(tecla >= "0" && tecla <= "9") && !MASCARA.test(tecla)) {
+                    e.preventDefault();
+                    campo.setCustomValidity("Informe apenas números — letras não são permitidas.");
+                } else {
+                    campo.setCustomValidity("");
+                }
+            });
+
+            campo.addEventListener("input", function () {
+                // Remove letras que entrem por cola, autocompletar ou arrastar.
+                var antes = campo.value;
+                var limpo = antes.replace(/[^0-9()\-+.\s]/g, "");
+                if (limpo !== antes) {
+                    var posicao = campo.selectionStart;
+                    campo.value = limpo;
+                    if (posicao !== null) campo.setSelectionRange(posicao, posicao);
+                }
+
+                var digitos = limpo.replace(/\D/g, "");
+                if (limpo.trim() === "") {
+                    campo.setCustomValidity(""); // vazio: o `required` já cobre
+                } else if (digitos.length < 8 || digitos.length > 15) {
+                    campo.setCustomValidity("Informe um telefone válido com DDD (de 8 a 15 números).");
+                } else {
+                    campo.setCustomValidity("");
+                }
+            });
+        })();
+    </script>
+}

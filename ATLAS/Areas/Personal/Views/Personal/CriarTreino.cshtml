@@ -1,0 +1,16 @@
+@model TreinoFormViewModel
+
+<div class="saudacao">
+    <h2>Novo <em>treino</em></h2>
+    <p>Monte uma ficha personalizada e envie para o aluno.</p>
+</div>
+
+<partial name="_FormularioTreino" model="Model" />
+
+<a asp-area="Personal" asp-controller="Personal" asp-action="Treinos" class="btn btn-ghost btn-sm" style="margin-top:0.9rem;">
+    Voltar para treinos
+</a>
+
+@section Scripts {
+    <script src="~/js/treino-form.js" asp-append-version="true"></script>
+}

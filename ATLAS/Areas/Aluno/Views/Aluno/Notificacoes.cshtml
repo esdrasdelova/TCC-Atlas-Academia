@@ -1,0 +1,28 @@
+@model List<AlunoNotificacaoItem>
+
+<div class="saudacao">
+    <h2>Notificações</h2>
+    <p>Avisos importantes sobre o seu treino, avaliações e matrícula.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <partial name="_EstadoVazio"
+             model='@(new EstadoVazioViewModel { Icone = "badge", Titulo = "Você está em dia", Descricao = "Nenhuma pendência por aqui. Quando houver novidades (novos treinos, avaliações ou avisos), elas aparecerão neste espaço.", RotuloCta = "Ir para o início", UrlCta = "/aluno" })' />
+}
+else
+{
+    <div class="lista-painel">
+        @foreach (var n in Model)
+        {
+            <a class="lista-item notif-linha @n.Tipo" href="@n.Url">
+                <span class="card-icone card-icone--round" aria-hidden="true"><partial name="_Icone" model='@("pulse")' /></span>
+                <div class="lista-info">
+                    <strong>@n.Titulo</strong>
+                    <small>@n.Descricao</small>
+                </div>
+                <span class="chip @(n.Tipo == "alerta" ? "chip-cinza" : "chip-verde")">@(n.Tipo == "alerta" ? "Atenção" : "Informação")</span>
+            </a>
+        }
+    </div>
+}

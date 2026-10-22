@@ -1,0 +1,68 @@
+@model List<Exercicio>
+@{
+    var grupos = ViewBag.Grupos as List<string> ?? new List<string>();
+    var grupoSelecionado = ViewBag.GrupoSelecionado as string;
+}
+
+<div class="saudacao">
+    <h2>Banco de <em>exercícios</em></h2>
+    <p>Catálogo completo da academia — consulte antes de montar as fichas.</p>
+</div>
+
+<div class="painel-acoes painel-acoes-chips" role="group" aria-label="Filtrar por grupo muscular">
+    <a asp-area="Personal" asp-controller="Personal" asp-action="BancoExercicios"
+       class="chip @(string.IsNullOrEmpty(grupoSelecionado) ? "chip-verde" : "chip-cinza")">
+        Todos (@Model.Count)
+    </a>
+    @foreach (var grupo in grupos)
+    {
+        <a asp-area="Personal" asp-controller="Personal" asp-action="BancoExercicios" asp-route-grupo="@grupo"
+           class="chip @(grupoSelecionado == grupo ? "chip-verde" : "chip-cinza")">
+            @grupo
+        </a>
+    }
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M3.5 12h17M12 3.5v17"/></svg>
+        </span>
+        <strong>Nenhum exercício encontrado</strong>
+        <small>Não há exercícios cadastrados neste filtro.</small>
+    </div>
+}
+else
+{
+    @foreach (var grupo in Model.GroupBy(e => e.GrupoMuscular).OrderBy(g => g.Key))
+    {
+        <div class="painel-secao" style="margin-top:1.6rem; margin-bottom:0.9rem;">
+            <h2>@grupo.Key</h2>
+            <span>@grupo.Count() exercício(s)</span>
+        </div>
+
+        <div class="lista-painel">
+            @foreach (var exercicio in grupo)
+            {
+                <details class="lista-item" style="display:block; color:inherit;">
+                    <summary style="display:flex; align-items:center; gap:0.9rem; cursor:pointer; list-style:none;">
+                        <span class="avatar avatar-sm" aria-hidden="true">@exercicio.Id</span>
+                        <div class="lista-info" style="flex:1;">
+                            <strong>@exercicio.Nome</strong>
+                            <small>@exercicio.GrupoMuscular</small>
+                        </div>
+                    </summary>
+                    @if (!string.IsNullOrEmpty(exercicio.Descricao))
+                    {
+                        <p style="margin:0.8rem 0 0.3rem; font-size:0.92rem; color:var(--muted);">@exercicio.Descricao</p>
+                    }
+                    @if (!string.IsNullOrEmpty(exercicio.Instrucoes))
+                    {
+                        <p style="margin:0.3rem 0 0; font-size:0.88rem;"><em>Execução:</em> @exercicio.Instrucoes</p>
+                    }
+                </details>
+            }
+        </div>
+    }
+}

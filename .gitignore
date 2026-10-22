@@ -1,0 +1,85 @@
+# .NET
+bin/
+obj/
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio / VS Code
+.vs/
+*.suo
+*.tlog
+*.tlog.*
+*.vc.db
+*.VC.VC.opendb
+*.VC.db
+.vscode/launch.json
+
+# User secrets (NUNCA commitar)
+**/secrets.json
+**/appsettings.Secrets.json
+**/appsettings.*.Secrets.json
+**/appsettings.Local.json
+
+# Environment files (NUNCA commitar)
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# NuGet
+packages/
+*.nupkg
+*.snupkg
+
+# Test results
+TestResults/
+*.trx
+
+# Coverage
+coverage/
+*.coverage
+*.coveragexml
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# Rider
+.idea/
+
+# Docker
+docker-compose.override.yml
+
+# Supabase / Local development
+.supabase/

@@ -1,0 +1,56 @@
+@model List<Treino>
+@{
+    var nome = ViewData["UsuarioNome"] as string ?? "Aluno";
+    var primeiroNome = nome.Split(' ')[0];
+}
+
+<div class="saudacao">
+    <h2>Meus <em>treinos</em></h2>
+    <p>As fichas personalizadas criadas pelo seu personal, acessíveis de qualquer lugar.</p>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h10"/><rect x="3" y="8.5" width="3" height="7" rx="1"/><rect x="18" y="8.5" width="3" height="7" rx="1"/><path d="M6.2 6.5v11M17.8 6.5v11" opacity=".55"/></svg>
+        </span>
+        <strong>Nenhum treino publicado ainda</strong>
+        <small>Seu personal está montando sua ficha — volte aqui em breve.</small>
+    </div>
+}
+
+@foreach (var treino in Model)
+{
+    <div class="painel-secao" style="margin-top:1.8rem; margin-bottom:0.9rem;">
+        <h2>@treino.Nome — @treino.Objetivo</h2>
+        @if (treino.Ativo)
+        {
+            <span class="chip chip-verde">Em uso</span>
+        }
+        else
+        {
+            <span class="chip chip-cinza">Alternativo</span>
+        }
+    </div>
+
+    <div class="treino-lista">
+        @{ var i = 1; }
+        @foreach (var exercicio in treino.Itens.OrderBy(x => x.Ordem))
+        {
+            <div class="exercicio-item">
+                <span class="exercicio-num">@i.ToString("00")</span>
+                <div class="exercicio-info">
+                    <strong>@exercicio.Exercicio.Nome</strong>
+                    <small>@exercicio.Series × @exercicio.Repeticoes@(string.IsNullOrEmpty(exercicio.Carga) ? "" : $" · {exercicio.Carga}")@(exercicio.DescansoSegundos > 0 ? $" · descanso {exercicio.DescansoSegundos}s" : "")</small>
+                </div>
+            </div>
+            i++;
+        }
+    </div>
+
+    <a asp-area="Aluno" asp-controller="Aluno" asp-action="Detalhe" asp-route-id="@treino.Id" class="btn btn-primary btn-sm" style="margin-top:0.9rem;">
+        Ver treino completo
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    </a>
+}

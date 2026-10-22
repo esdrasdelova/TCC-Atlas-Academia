@@ -1,0 +1,118 @@
+@model List<Treino>
+@{
+    var sucesso = TempData["Sucesso"] as string;
+    var erro = TempData["Erro"] as string;
+    var totalPublicados = ViewBag.TotalPublicados is int n ? n : Model.Count(t => t.Publicado);
+}
+
+<div class="saudacao">
+    <h2>Treinos <em>personalizados</em></h2>
+    <p>Todas as fichas criadas pelos profissionais — visão completa da administração.</p>
+</div>
+
+@if (!string.IsNullOrEmpty(sucesso))
+{
+    <div class="aviso">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+        <span>@sucesso</span>
+    </div>
+}
+
+@if (!string.IsNullOrEmpty(erro))
+{
+    <div class="aviso aviso-erro">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg>
+        <span>@erro</span>
+    </div>
+}
+
+<div class="painel-acoes">
+    <div>
+        <strong>@Model.Count</strong> treinos no total ·
+        <strong>@totalPublicados</strong> publicados para os alunos
+    </div>
+    <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoNovo" class="btn btn-primary btn-sm">
+        + Novo treino
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+    </a>
+</div>
+
+@if (Model.Count == 0)
+{
+    <div class="vazio-estado">
+        <span class="vazio-icone">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12h10"/><rect x="3" y="8.5" width="3" height="7" rx="1"/><rect x="18" y="8.5" width="3" height="7" rx="1"/><path d="M6.2 6.5v11M17.8 6.5v11" opacity=".55"/></svg>
+        </span>
+        <strong>Nenhum treino cadastrado ainda</strong>
+        <small>Use "+ Novo treino" ou peça a um personal para montar a primeira ficha.</small>
+    </div>
+}
+
+@foreach (var grupo in Model.GroupBy(t => t.Aluno).OrderBy(g => g.Key.NomeCompleto))
+{
+    var aluno = grupo.Key;
+    var ativo = grupo.FirstOrDefault(t => t.Ativo && t.Publicado);
+
+    <div class="painel-secao" style="margin-top:1.8rem; margin-bottom:0.9rem;">
+        <h2>@aluno.NomeCompleto</h2>
+        @if (ativo != null)
+        {
+            <span class="chip chip-verde">@ativo.Nome em uso</span>
+        }
+        else
+        {
+            <span class="chip chip-cinza">Sem treino ativo</span>
+        }
+        <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoNovo" asp-route-alunoId="@aluno.Id" class="chip chip-verde">+ Treino para @aluno.NomeCompleto.Split(' ')[0]</a>
+    </div>
+
+    <div class="lista-painel">
+        @foreach (var treino in grupo.OrderByDescending(t => t.DataCriacao))
+        {
+            <div class="lista-item @(treino.Ativo && treino.Publicado ? "lista-item-destaque" : "")">
+                <div class="lista-info">
+                    <strong>@treino.Nome — @(treino.Objetivo ?? "sem foco definido")</strong>
+                    <small>
+                        @treino.Itens.Count exercícios
+                        · responsável: @(treino.Personal?.NomeCompleto ?? "—")
+                        @(treino.Publicado ? (treino.Ativo ? "· em uso pelo aluno" : "· alternativo") : "· oculto do aluno")
+                        · criado em @treino.DataCriacao.ToLocalTime().ToString("dd/MM/yyyy")
+                    </small>
+                </div>
+                <div class="lista-acoes lista-acoes-multiplo">
+                    @if (!treino.Publicado)
+                    {
+                        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoAlternarPublicacao" asp-route-id="@treino.Id"
+                              onsubmit="return confirm('Publicar o treino &quot;@treino.Nome&quot;?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-ghost btn-sm">Publicar</button>
+                        </form>
+                    }
+                    else if (!treino.Ativo)
+                    {
+                        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoAtivar" asp-route-id="@treino.Id"
+                              onsubmit="return confirm('Ativar o treino &quot;@treino.Nome&quot; para @aluno.NomeCompleto?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-ghost btn-sm">Usar agora</button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoAlternarPublicacao" asp-route-id="@treino.Id"
+                              onsubmit="return confirm('Ocultar o treino &quot;@treino.Nome&quot; da área do aluno?');">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-ghost btn-sm">Ocultar</button>
+                        </form>
+                    }
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoDetalhe" asp-route-id="@treino.Id" class="btn btn-ghost btn-sm">Ver</a>
+                    <a asp-area="Admin" asp-controller="Admin" asp-action="TreinoEditar" asp-route-id="@treino.Id" class="btn btn-ghost btn-sm">Editar</a>
+                    <form method="post" asp-area="Admin" asp-controller="Admin" asp-action="TreinoExcluir" asp-route-id="@treino.Id"
+                          onsubmit="return confirm('Excluir o treino &quot;@treino.Nome&quot; de @aluno.NomeCompleto? Esta ação não pode ser desfeita.');">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="btn btn-ghost btn-sm btn-perigo">Excluir</button>
+                    </form>
+                </div>
+            </div>
+        }
+    </div>
+}
